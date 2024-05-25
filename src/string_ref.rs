@@ -39,8 +39,18 @@ impl<'a> StringRef<'a> {
     /// # Returns
     /// Returns the [StringRef] as a `&str`.
     pub fn as_str(&self) -> &'a str {
+        if self.raw.length == 0 {
+            return "";
+        }
+
         let bytes = unsafe { slice::from_raw_parts(self.raw.data as *const u8, self.raw.length) };
-        str::from_utf8(bytes).expect("MLIR StringRef was not valid UTF-8")
+        let string_bytes = if bytes[bytes.len() - 1] == 0 {
+            &bytes[..bytes.len() - 1]
+        } else {
+            bytes
+        };
+
+        str::from_utf8(string_bytes).expect("MLIR StringRef was not valid UTF-8")
     }
 }
 
