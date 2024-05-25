@@ -44,8 +44,8 @@ impl Context {
     /// Creates a new MLIR Context.
     ///
     /// # Arguments
-    /// * `dialect_registry` - An optional reference to a [DialectRegistryRef] from which to preload
-    ///    dialects.
+    /// * `dialect_registry` - An optional reference to a [DialectRegistryRef] from which to
+    /// pre-register dialects.
     /// * `threading_enabled` - Whether to enable multithreading.
     ///
     /// # Returns
@@ -67,20 +67,6 @@ impl Context {
     }
 }
 
-impl PartialEq for Context {
-    fn eq(&self, other: &Self) -> bool {
-        unsafe { mlirContextEqual(self.raw, other.raw) }
-    }
-}
-
-impl PartialEq<ContextRef> for Context {
-    fn eq(&self, other: &ContextRef) -> bool {
-        unsafe { mlirContextEqual(self.raw, other.to_raw()) }
-    }
-}
-
-impl Eq for Context {}
-
 impl Drop for Context {
     fn drop(&mut self) {
         unsafe { mlirContextDestroy(self.raw) }
@@ -94,6 +80,20 @@ impl Deref for Context {
         unsafe { ContextRef::from_raw(self.raw) }
     }
 }
+
+impl PartialEq for Context {
+    fn eq(&self, other: &Self) -> bool {
+        unsafe { mlirContextEqual(self.raw, other.raw) }
+    }
+}
+
+impl PartialEq<ContextRef> for Context {
+    fn eq(&self, other: &ContextRef) -> bool {
+        unsafe { mlirContextEqual(self.raw, other.to_raw()) }
+    }
+}
+
+impl Eq for Context {}
 
 /// [ContextRef] is a reference to an instance of the `mlir::MLIRContext` class.
 ///
@@ -111,7 +111,8 @@ impl ContextRef {
     ///
     /// # Safety
     /// The caller of this function is responsible for associating the reference to the [ContextRef]
-    /// with a lifetime that is bound to its owner.
+    /// with a lifetime that is bound to its owner, and ensuring that the provided raw [MlirContext]
+    /// value is valid.
     ///
     /// # Arguments
     /// * `context` - The raw [MlirContext] value.
@@ -170,9 +171,9 @@ impl ContextRef {
     ///
     /// # Returns
     /// Returns the dialect with the given name.
-    pub fn get_or_load_dialect(
+    pub fn get_or_load_dialect<'a>(
         &self,
-        dialect_name: impl for<'a> Into<StringRef<'a>>,
+        dialect_name: impl Into<StringRef<'a>>,
     ) -> Option<&DialectRef> {
         let dialect_name = dialect_name.into().to_raw();
         let raw_dialect = unsafe { mlirContextGetOrLoadDialect(self.to_raw(), dialect_name) };
@@ -205,12 +206,15 @@ impl ContextRef {
     ///
     /// # Returns
     /// Returns whether the operation is registered and its dialect is loaded.
-    pub fn is_operation_registered(
-        &self,
-        operation_name: impl for<'a> Into<StringRef<'a>>,
-    ) -> bool {
+    pub fn is_operation_registered<'a>(&self, operation_name: impl Into<StringRef<'a>>) -> bool {
         let operation_name = operation_name.into().to_raw();
         unsafe { mlirContextIsRegisteredOperation(self.to_raw(), operation_name) }
+    }
+}
+
+impl Drop for ContextRef {
+    fn drop(&mut self) {
+        panic!("Owned instances of ContextRef should never be created!")
     }
 }
 
@@ -227,3 +231,119 @@ impl PartialEq<Context> for ContextRef {
 }
 
 impl Eq for ContextRef {}
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+    use crate::DialectRegistry;
+
+    #[test]
+    fn new() {
+        let context = Context::new(None, false);
+        assert_eq!(context.num_registered_dialects(), 1);
+        assert_eq!(context.num_loaded_dialects(), 1);
+    }
+
+    #[test]
+    fn new_with_registry() {
+        let dialect_registry = DialectRegistry::default();
+        dialect_registry.register_all_dialects();
+        let context = Context::new(Some(&dialect_registry), false);
+        assert_eq!(context.num_registered_dialects(), 42);
+        assert_eq!(context.num_loaded_dialects(), 1);
+    }
+
+    #[test]
+    fn allows_unregistered_dialects() {
+        let context = Context::new(None, false);
+        assert!(!context.allows_unregistered_dialects());
+        context.set_allow_unregistered_dialects(true);
+        assert!(context.allows_unregistered_dialects());
+    }
+
+    #[test]
+    fn append_dialect_registry() {
+        let context = Context::new(None, false);
+        let dialect_registry = DialectRegistry::default();
+        dialect_registry.register_all_dialects();
+        context.append_dialect_registry(&dialect_registry);
+        assert_eq!(context.num_registered_dialects(), 42);
+        assert_eq!(context.num_loaded_dialects(), 1);
+    }
+
+    #[test]
+    fn load_dialects() {
+        let dialect_registry = DialectRegistry::default();
+        dialect_registry.register_all_dialects();
+        let context = Context::new(Some(&dialect_registry), false);
+        context.load_all_available_dialects();
+        assert_eq!(context.num_loaded_dialects(), 42);
+    }
+
+    #[test]
+    fn get_dialect() {
+        let context = Context::new(None, false);
+        assert_eq!(
+            context.get_or_load_dialect(&"builtin").unwrap().namespace(),
+            "builtin"
+        );
+        assert!(context.get_or_load_dialect(&"func").is_none());
+
+        let dialect_registry = DialectRegistry::default();
+        dialect_registry.register_all_dialects();
+        context.append_dialect_registry(&dialect_registry);
+        assert_eq!(
+            context.get_or_load_dialect(&"func").unwrap().namespace(),
+            "func"
+        );
+    }
+
+    #[test]
+    fn is_registered_operation() {
+        let context = Context::new(None, false);
+        assert!(context.is_operation_registered(&"builtin.module"));
+        assert!(!context.is_operation_registered(&"func.func"));
+
+        let dialect_registry = DialectRegistry::default();
+        dialect_registry.register_all_dialects();
+        context.append_dialect_registry(&dialect_registry);
+        assert!(!context.is_operation_registered(&"func.func"));
+
+        context.load_all_available_dialects();
+        assert!(context.is_operation_registered(&"func.func"));
+    }
+
+    #[test]
+    fn compare_contexts() {
+        let context1 = Context::new(None, false);
+        let context2 = Context::new(None, false);
+
+        assert_eq!(context1, context1);
+        assert_eq!(context1.deref(), &context1);
+        assert_eq!(&context1, context1.deref());
+        assert_eq!(context1.deref(), context1.deref());
+
+        assert_ne!(context1, context2);
+        assert_ne!(context1.deref(), &context2);
+        assert_ne!(&context1, context2.deref());
+        assert_ne!(context1.deref(), context2.deref());
+
+        assert_ne!(context2, context1);
+        assert_ne!(context2.deref(), &context1);
+        assert_ne!(&context2, context1.deref());
+        assert_ne!(context2.deref(), context1.deref());
+
+        assert_eq!(context2, context2);
+        assert_eq!(context2.deref(), &context2);
+        assert_eq!(&context2, context2.deref());
+        assert_eq!(context2.deref(), context2.deref());
+    }
+
+    #[test]
+    #[should_panic]
+    fn no_owned_context_ref() {
+        let _context_ref = ContextRef {
+            _prevent_external_instantiation: PhantomData,
+        };
+    }
+}

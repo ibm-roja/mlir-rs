@@ -1,9 +1,17 @@
 use std::{marker::PhantomData, mem::transmute, ops::Deref};
 
-use mlir_sys::MlirDialectRegistry;
+use mlir_sys::{
+    mlirDialectRegistryCreate, mlirDialectRegistryDestroy, mlirRegisterAllDialects,
+    MlirDialectRegistry,
+};
 
 /// [DialectRegistry] wraps the `mlir::DialectRegistry` class, which holds mappings from dialect
 /// namespaces to the constructors for their matching dialect.
+///
+/// All relevant bindings into the MLIR C API are used/supported:
+/// - `mlirDialectRegistryCreate`
+/// - `mlirDialectRegistryDestroy`
+/// - `mlirRegisterAllDialects`
 #[repr(transparent)]
 #[derive(Debug)]
 pub struct DialectRegistry {
@@ -15,6 +23,20 @@ impl DialectRegistry {
     /// Returns the raw [MlirDialectRegistry] value.
     pub fn to_raw(&self) -> MlirDialectRegistry {
         self.raw
+    }
+}
+
+impl Default for DialectRegistry {
+    fn default() -> Self {
+        Self {
+            raw: unsafe { mlirDialectRegistryCreate() },
+        }
+    }
+}
+
+impl Drop for DialectRegistry {
+    fn drop(&mut self) {
+        unsafe { mlirDialectRegistryDestroy(self.raw) }
     }
 }
 
@@ -58,5 +80,16 @@ impl DialectRegistryRef {
     /// Returns the reference to the [DialectRegistryRef] as an [MlirDialectRegistry].
     pub fn to_raw(&self) -> MlirDialectRegistry {
         unsafe { transmute(self) }
+    }
+
+    /// Registers all dialects known to MLIR with the dialect registry.
+    pub fn register_all_dialects(&self) {
+        unsafe { mlirRegisterAllDialects(self.to_raw()) }
+    }
+}
+
+impl Drop for DialectRegistryRef {
+    fn drop(&mut self) {
+        panic!("Owned instances of DialectRegistryRef should never be created!")
     }
 }
