@@ -93,3 +93,32 @@ impl Drop for DialectRegistryRef {
         panic!("Owned instances of DialectRegistryRef should never be created!")
     }
 }
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+    use crate::Context;
+
+    #[test]
+    fn empty_registry() {
+        let dialect_registry = DialectRegistry::default();
+        let context = Context::new(Some(&dialect_registry), false);
+        assert_eq!(context.num_registered_dialects(), 1);
+    }
+
+    #[test]
+    fn all_available_dialects() {
+        let dialect_registry = DialectRegistry::default();
+        dialect_registry.register_all_dialects();
+        let context = Context::new(Some(&dialect_registry), false);
+        assert_eq!(context.num_registered_dialects(), 42);
+    }
+
+    #[test]
+    #[should_panic]
+    fn no_owned_registry_ref() {
+        let _registry_ref = DialectRegistryRef {
+            _prevent_external_instantiation: PhantomData,
+        };
+    }
+}
