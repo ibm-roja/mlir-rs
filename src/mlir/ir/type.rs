@@ -1,3 +1,7 @@
+mod integer;
+mod none;
+
+pub use self::{integer::*, none::*};
 use crate::{
     support::{
         binding::{impl_unowned_mlir_value, UnownedMlirValue},
@@ -12,15 +16,14 @@ use std::{
 };
 
 use mlir_sys::{
-    mlirNoneTypeGet, mlirTypeEqual, mlirTypeGetContext, mlirTypeGetDialect, mlirTypeParseGet,
-    mlirTypePrint, MlirType,
+    mlirTypeEqual, mlirTypeGetContext, mlirTypeGetDialect, mlirTypeParseGet, mlirTypePrint,
+    MlirType,
 };
 
 /// [TypeRef] is a reference to an instance of the `mlir::Type` class, which represents a type in
 /// the MLIR IR.
 ///
 /// The following bindings into the MLIR C API are used/supported:
-/// - `mlirNoneTypeGet`
 /// - `mlirTypeEqual`
 /// - `mlirTypeGetContext`
 /// - `mlirTypeGetDialect`
@@ -39,11 +42,6 @@ pub struct TypeRef {
 impl_unowned_mlir_value!(TypeRef, MlirType);
 
 impl TypeRef {
-    // TODO: Should this be in TypeRef?
-    pub fn none(context: &ContextRef) -> &Self {
-        unsafe { Self::from_raw(mlirNoneTypeGet(context.to_raw())) }
-    }
-
     /// Attempts to parse a type from the provided string.
     ///
     /// # Arguments
@@ -89,6 +87,35 @@ impl Display for TypeRef {
         Ok(())
     }
 }
+
+macro_rules! impl_type_variant {
+    ($variant_type: ident, $verify_fn: ident) => {
+        impl $variant_type {
+            pub fn try_from_type(ty: &$crate::ir::TypeRef) -> Option<&Self> {
+                let types_match = unsafe { $verify_fn(ty.to_raw()) };
+                if types_match {
+                    Some(unsafe { $variant_type::from_raw(ty.to_raw()) })
+                } else {
+                    None
+                }
+            }
+
+            pub fn as_type(&self) -> &$crate::ir::TypeRef {
+                unsafe { $crate::ir::TypeRef::from_raw(self.to_raw()) }
+            }
+        }
+
+        impl std::ops::Deref for $variant_type {
+            type Target = $crate::ir::TypeRef;
+
+            fn deref(&self) -> &Self::Target {
+                self.as_type()
+            }
+        }
+    };
+}
+
+use impl_type_variant;
 
 #[cfg(test)]
 mod tests {

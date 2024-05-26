@@ -161,7 +161,7 @@ impl<'a> NamedAttribute<'a> {
 #[cfg(test)]
 mod tests {
     use super::*;
-    use crate::Context;
+    use crate::{ir::r#type::NoneTypeRef, Context};
 
     #[test]
     fn parse_attribute() {
@@ -183,7 +183,7 @@ mod tests {
     fn r#type() {
         let context = Context::new(None, false);
         let attribute = AttributeRef::parse(&context, "unit").unwrap();
-        assert_eq!(attribute.r#type(), TypeRef::none(&context));
+        assert_eq!(attribute.r#type(), NoneTypeRef::new(&context).as_type());
     }
 
     #[test]
