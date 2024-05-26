@@ -1,6 +1,8 @@
 use crate::{
-    binding::{impl_unowned_mlir_value, UnownedMlirValue},
-    string_reader::StringReader,
+    support::{
+        binding::{impl_unowned_mlir_value, UnownedMlirValue},
+        string_reader::StringReader,
+    },
     ContextRef, DialectRef, StringRef,
 };
 
@@ -18,10 +20,10 @@ use mlir_sys::{
 /// the MLIR IR.
 ///
 /// The following bindings into the MLIR C API are used/supported:
+/// - `mlirNoneTypeGet`
 /// - `mlirTypeEqual`
 /// - `mlirTypeGetContext`
 /// - `mlirTypeGetDialect`
-/// - `mlirTypeNoneGet`
 /// - `mlirTypeParseGet`
 /// - `mlirTypePrint`
 ///
@@ -85,5 +87,57 @@ impl Display for TypeRef {
         let mut reader = StringReader::new(f);
         unsafe { mlirTypePrint(self.to_raw(), reader.callback(), reader.as_raw_mut()) }
         Ok(())
+    }
+}
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+    use crate::Context;
+
+    #[test]
+    fn parse() {
+        let context = Context::new(None, false);
+        assert!(TypeRef::parse(&context, "i32").is_some());
+        assert!(TypeRef::parse(&context, "f32").is_some());
+        assert!(TypeRef::parse(&context, "index").is_some());
+        assert!(TypeRef::parse(&context, "z").is_none());
+    }
+
+    #[test]
+    fn context() {
+        let context = Context::new(None, false);
+        let ty = TypeRef::parse(&context, "i32").unwrap();
+        assert_eq!(ty.context(), &context);
+    }
+
+    #[test]
+    fn dialect() {
+        let context = Context::new(None, false);
+        let ty = TypeRef::parse(&context, "i32").unwrap();
+        assert_eq!(ty.dialect().namespace(), "builtin");
+    }
+
+    #[test]
+    fn compare_types() {
+        let context = Context::new(None, false);
+        let type1 = TypeRef::parse(&context, "i32").unwrap();
+        let type2 = TypeRef::parse(&context, "i32").unwrap();
+        let type3 = TypeRef::parse(&context, "f32").unwrap();
+        assert_eq!(type1, type1);
+        assert_eq!(type1, type2);
+        assert_eq!(type2, type2);
+        assert_ne!(type1, type3);
+        assert_ne!(type3, type1);
+        assert_ne!(type2, type3);
+        assert_ne!(type3, type2);
+    }
+
+    #[test]
+    #[should_panic]
+    fn no_owned_type_ref() {
+        let _type_ref = TypeRef {
+            _prevent_external_instantiation: PhantomData,
+        };
     }
 }

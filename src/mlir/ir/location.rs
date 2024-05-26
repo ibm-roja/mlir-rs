@@ -1,7 +1,10 @@
 use crate::{
-    binding::{impl_unowned_mlir_value, UnownedMlirValue},
-    string_reader::StringReader,
-    AttributeRef, ContextRef, StringRef,
+    ir::AttributeRef,
+    support::{
+        binding::{impl_unowned_mlir_value, UnownedMlirValue},
+        string_reader::StringReader,
+    },
+    ContextRef, StringRef,
 };
 
 use std::{

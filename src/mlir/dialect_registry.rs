@@ -1,4 +1,4 @@
-use crate::binding::{impl_owned_mlir_value, impl_unowned_mlir_value, UnownedMlirValue};
+use crate::support::binding::{impl_owned_mlir_value, impl_unowned_mlir_value, UnownedMlirValue};
 
 use std::{marker::PhantomData, ops::Deref};
 

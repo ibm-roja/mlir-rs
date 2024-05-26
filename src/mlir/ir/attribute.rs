@@ -1,7 +1,10 @@
 use crate::{
-    binding::{impl_unowned_mlir_value, UnownedMlirValue},
-    string_reader::StringReader,
-    ContextRef, DialectRef, IdentifierRef, StringRef, TypeRef,
+    ir::{IdentifierRef, TypeRef},
+    support::{
+        binding::{impl_unowned_mlir_value, UnownedMlirValue},
+        string_reader::StringReader,
+    },
+    ContextRef, DialectRef, StringRef,
 };
 
 use std::{
@@ -215,5 +218,13 @@ mod tests {
         assert_ne!(attribute3, attribute1);
         assert_ne!(attribute2, attribute3);
         assert_ne!(attribute3, attribute2);
+    }
+
+    #[test]
+    #[should_panic]
+    fn no_owned_attribute_ref() {
+        let _attribute_ref = AttributeRef {
+            _prevent_external_instantiation: PhantomData,
+        };
     }
 }

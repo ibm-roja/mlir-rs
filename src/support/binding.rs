@@ -93,7 +93,7 @@ where
 
 macro_rules! impl_owned_mlir_value {
     ($owning_type:ty, $binding:ty) => {
-        impl $crate::binding::OwnedMlirValue for $owning_type {
+        impl $crate::support::binding::OwnedMlirValue for $owning_type {
             type Binding = $binding;
 
             unsafe fn from_raw(raw: Self::Binding) -> Self {
@@ -117,7 +117,7 @@ macro_rules! impl_owned_mlir_value {
 
 macro_rules! impl_unowned_mlir_value {
     ($ref_type:ty, $binding:ty) => {
-        impl $crate::binding::UnownedMlirValue for $ref_type {
+        impl $crate::support::binding::UnownedMlirValue for $ref_type {
             type Binding = $binding;
 
             unsafe fn from_raw<'a>(raw: Self::Binding) -> &'a Self {

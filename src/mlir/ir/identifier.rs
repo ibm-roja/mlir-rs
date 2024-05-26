@@ -1,5 +1,5 @@
 use crate::{
-    binding::{impl_unowned_mlir_value, UnownedMlirValue},
+    support::binding::{impl_unowned_mlir_value, UnownedMlirValue},
     ContextRef, StringRef,
 };
 

@@ -1,5 +1,5 @@
 use crate::{
-    binding::{impl_owned_mlir_value, impl_unowned_mlir_value, UnownedMlirValue},
+    support::binding::{impl_owned_mlir_value, impl_unowned_mlir_value, UnownedMlirValue},
     DialectRef, DialectRegistryRef, StringRef,
 };
 

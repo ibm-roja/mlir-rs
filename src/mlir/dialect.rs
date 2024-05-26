@@ -1,5 +1,5 @@
 use crate::{
-    binding::{impl_unowned_mlir_value, UnownedMlirValue},
+    support::binding::{impl_unowned_mlir_value, UnownedMlirValue},
     ContextRef, StringRef,
 };
 
@@ -51,7 +51,7 @@ impl Eq for DialectRef {}
 #[cfg(test)]
 mod tests {
     use super::*;
-    use crate::{binding::OwnedMlirValue, Context, DialectHandle};
+    use crate::{support::binding::OwnedMlirValue, Context, DialectHandle};
 
     use mlir_sys::{mlirGetDialectHandle__arith__, mlirGetDialectHandle__func__};
 
