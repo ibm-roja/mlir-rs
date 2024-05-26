@@ -1,4 +1,6 @@
-use std::{marker::PhantomData, mem::transmute, ops::Deref};
+use crate::binding::{impl_owned_mlir_value, impl_unowned_mlir_value, UnownedMlirValue};
+
+use std::{marker::PhantomData, ops::Deref};
 
 use mlir_sys::{
     mlirDialectRegistryCreate, mlirDialectRegistryDestroy, mlirRegisterAllDialects,
@@ -18,13 +20,7 @@ pub struct DialectRegistry {
     raw: MlirDialectRegistry,
 }
 
-impl DialectRegistry {
-    /// # Returns
-    /// Returns the raw [MlirDialectRegistry] value.
-    pub fn to_raw(&self) -> MlirDialectRegistry {
-        self.raw
-    }
-}
+impl_owned_mlir_value!(DialectRegistry, MlirDialectRegistry);
 
 impl Default for DialectRegistry {
     fn default() -> Self {
@@ -40,14 +36,6 @@ impl Drop for DialectRegistry {
     }
 }
 
-impl Deref for DialectRegistry {
-    type Target = DialectRegistryRef;
-
-    fn deref(&self) -> &Self::Target {
-        unsafe { DialectRegistryRef::from_raw(self.raw) }
-    }
-}
-
 /// [DialectRegistryRef] is a reference to an instance of the `mlir::DialectRegistry` class.
 ///
 /// # Safety
@@ -59,38 +47,12 @@ pub struct DialectRegistryRef {
     _prevent_external_instantiation: PhantomData<()>,
 }
 
+impl_unowned_mlir_value!(DialectRegistry, DialectRegistryRef, MlirDialectRegistry);
+
 impl DialectRegistryRef {
-    /// Constructs a reference to a [DialectRegistryRef] from the provided raw [MlirDialectRegistry]
-    /// value.
-    ///
-    /// # Safety
-    /// The caller of this function is responsible for associating the reference to the
-    /// [DialectRegistryRef] with a lifetime that is bound to its owner.
-    ///
-    /// # Arguments
-    /// * `dialect_registry` - The raw [MlirDialectRegistry] value.
-    ///
-    /// # Returns
-    /// Returns a new [DialectRegistryRef] instance.
-    pub unsafe fn from_raw<'a>(dialect_registry: MlirDialectRegistry) -> &'a Self {
-        transmute(dialect_registry)
-    }
-
-    /// # Returns
-    /// Returns the reference to the [DialectRegistryRef] as an [MlirDialectRegistry].
-    pub fn to_raw(&self) -> MlirDialectRegistry {
-        unsafe { transmute(self) }
-    }
-
     /// Registers all dialects known to MLIR with the dialect registry.
     pub fn register_all_dialects(&self) {
         unsafe { mlirRegisterAllDialects(self.to_raw()) }
-    }
-}
-
-impl Drop for DialectRegistryRef {
-    fn drop(&mut self) {
-        panic!("Owned instances of DialectRegistryRef should never be created!")
     }
 }
 

@@ -1,11 +1,14 @@
-use crate::{DialectRef, DialectRegistryRef, StringRef};
+use crate::{
+    binding::{impl_owned_mlir_value, impl_unowned_mlir_value, UnownedMlirValue},
+    DialectRef, DialectRegistryRef, StringRef,
+};
 
-use std::{marker::PhantomData, mem::transmute, ops::Deref};
+use std::{marker::PhantomData, ops::Deref};
 
 use mlir_sys::{
     mlirContextAppendDialectRegistry, mlirContextCreateWithRegistry,
-    mlirContextCreateWithThreading, mlirContextDestroy, mlirContextEnableMultithreading,
-    mlirContextEqual, mlirContextGetAllowUnregisteredDialects, mlirContextGetNumLoadedDialects,
+    mlirContextCreateWithThreading, mlirContextEnableMultithreading, mlirContextEqual,
+    mlirContextGetAllowUnregisteredDialects, mlirContextGetNumLoadedDialects,
     mlirContextGetNumRegisteredDialects, mlirContextGetOrLoadDialect,
     mlirContextIsRegisteredOperation, mlirContextLoadAllAvailableDialects,
     mlirContextSetAllowUnregisteredDialects, MlirContext,
@@ -15,30 +18,32 @@ use mlir_sys::{
 /// operations.
 ///
 /// The following bindings into the MLIR C API are used/supported:
-/// - `mlirContextCreateWithThreading`
-/// - `mlirContextCreateWithRegistry`
-/// - `mlirContextEqual`
-/// - `mlirContextDestroy`
-/// - `mlirContextSetAllowUnregisteredDialects`
-/// - `mlirContextGetAllowUnregisteredDialects`
-/// - `mlirContextGetNumRegisteredDialects`
 /// - `mlirContextAppendDialectRegistry`
-/// - `mlirContextGetNumLoadedDialects`
-/// - `mlirContextGetOrLoadDialect`
+/// - `mlirContextCreateWithRegistry`
+/// - `mlirContextCreateWithThreading`
+/// - `mlirContextDestroy`
 /// - `mlirContextEnableMultithreading`
-/// - `mlirContextLoadAllAvailableDialects`
+/// - `mlirContextEqual`
+/// - `mlirContextGetAllowUnregisteredDialects`
+/// - `mlirContextGetNumLoadedDialects`
+/// - `mlirContextGetNumRegisteredDialects`
+/// - `mlirContextGetOrLoadDialect`
 /// - `mlirContextIsRegisteredOperation`
+/// - `mlirContextLoadAllAvailableDialects`
+/// - `mlirContextSetAllowUnregisteredDialects`
 ///
 /// The following bindings are not used/supported:
-/// - `mlirContextCreate`
-/// - `mlirContextSetThreadPool`
 /// - `mlirContextAttachDiagnosticHandler`
+/// - `mlirContextCreate`
 /// - `mlirContextDetachDiagnosticHandler`
+/// - `mlirContextSetThreadPool`
 #[repr(transparent)]
 #[derive(Debug)]
 pub struct Context {
     raw: MlirContext,
 }
+
+impl_owned_mlir_value!(Context, MlirContext);
 
 impl Context {
     /// Creates a new MLIR Context.
@@ -67,20 +72,6 @@ impl Context {
     }
 }
 
-impl Drop for Context {
-    fn drop(&mut self) {
-        unsafe { mlirContextDestroy(self.raw) }
-    }
-}
-
-impl Deref for Context {
-    type Target = ContextRef;
-
-    fn deref(&self) -> &Self::Target {
-        unsafe { ContextRef::from_raw(self.raw) }
-    }
-}
-
 impl PartialEq for Context {
     fn eq(&self, other: &Self) -> bool {
         unsafe { mlirContextEqual(self.raw, other.raw) }
@@ -106,29 +97,9 @@ pub struct ContextRef {
     _prevent_external_instantiation: PhantomData<()>,
 }
 
+impl_unowned_mlir_value!(Context, ContextRef, MlirContext);
+
 impl ContextRef {
-    /// Constructs a reference to a [ContextRef] from the provided raw [MlirContext] value.
-    ///
-    /// # Safety
-    /// The caller of this function is responsible for associating the reference to the [ContextRef]
-    /// with a lifetime that is bound to its owner, and ensuring that the provided raw [MlirContext]
-    /// value is valid.
-    ///
-    /// # Arguments
-    /// * `context` - The raw [MlirContext] value.
-    ///
-    /// # Returns
-    /// Returns a new [ContextRef] instance.
-    pub unsafe fn from_raw<'a>(context: MlirContext) -> &'a Self {
-        transmute(context)
-    }
-
-    /// # Returns
-    /// Returns the reference to the [ContextRef] as an [MlirContext].
-    pub fn to_raw(&self) -> MlirContext {
-        unsafe { transmute(self) }
-    }
-
     /// # Returns
     /// Returns whether the context allows unregistered dialects.
     pub fn allows_unregistered_dialects(&self) -> bool {
@@ -209,12 +180,6 @@ impl ContextRef {
     pub fn is_operation_registered<'a>(&self, operation_name: impl Into<StringRef<'a>>) -> bool {
         let operation_name = operation_name.into().to_raw();
         unsafe { mlirContextIsRegisteredOperation(self.to_raw(), operation_name) }
-    }
-}
-
-impl Drop for ContextRef {
-    fn drop(&mut self) {
-        panic!("Owned instances of ContextRef should never be created!")
     }
 }
 

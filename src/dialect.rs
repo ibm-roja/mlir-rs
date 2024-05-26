@@ -1,6 +1,9 @@
-use crate::{ContextRef, StringRef};
+use crate::{
+    binding::{impl_unowned_mlir_value, UnownedMlirValue},
+    ContextRef, StringRef,
+};
 
-use std::{marker::PhantomData, mem::transmute};
+use std::marker::PhantomData;
 
 use mlir_sys::{mlirDialectEqual, mlirDialectGetContext, mlirDialectGetNamespace, MlirDialect};
 
@@ -21,29 +24,9 @@ pub struct DialectRef {
     _prevent_external_instantiation: PhantomData<()>,
 }
 
+impl_unowned_mlir_value!(DialectRef, MlirDialect);
+
 impl DialectRef {
-    /// Constructs a reference to a [DialectRef] from the provided raw [MlirDialect] value.
-    ///
-    /// # Safety
-    /// The caller of this function is responsible for associating the reference to the [DialectRef]
-    /// with a lifetime that is bound to its owner, and ensuring that the provided raw [MlirDialect]
-    /// value is valid.
-    ///
-    /// # Arguments
-    /// * `context` - The raw [MlirDialect] value.
-    ///
-    /// # Returns
-    /// Returns a new [DialectRef] instance.
-    pub unsafe fn from_raw<'a>(dialect: MlirDialect) -> &'a Self {
-        transmute(dialect)
-    }
-
-    /// # Returns
-    /// Returns the reference to the [DialectRef] as an [MlirDialect].
-    pub fn to_raw(&self) -> MlirDialect {
-        unsafe { transmute(self) }
-    }
-
     /// # Returns
     /// Returns a reference to the context that owns the dialect.
     pub fn context(&self) -> &ContextRef {
@@ -57,22 +40,18 @@ impl DialectRef {
     }
 }
 
-impl Drop for DialectRef {
-    fn drop(&mut self) {
-        panic!("Owned instances of DialectRef should never be created!")
-    }
-}
-
 impl PartialEq for DialectRef {
     fn eq(&self, other: &Self) -> bool {
         unsafe { mlirDialectEqual(self.to_raw(), other.to_raw()) }
     }
 }
 
+impl Eq for DialectRef {}
+
 #[cfg(test)]
 mod tests {
     use super::*;
-    use crate::{Context, DialectHandle};
+    use crate::{binding::OwnedMlirValue, Context, DialectHandle};
 
     use mlir_sys::{mlirGetDialectHandle__arith__, mlirGetDialectHandle__func__};
 

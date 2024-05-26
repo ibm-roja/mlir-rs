@@ -1,4 +1,7 @@
-use crate::{ContextRef, DialectRef, DialectRegistryRef, StringRef};
+use crate::{
+    binding::{impl_owned_mlir_value, OwnedMlirValue, UnownedMlirValue},
+    ContextRef, DialectRef, DialectRegistryRef, StringRef,
+};
 
 use mlir_sys::{
     mlirDialectHandleGetNamespace, mlirDialectHandleInsertDialect, mlirDialectHandleLoadDialect,
@@ -19,28 +22,9 @@ pub struct DialectHandle {
     raw: MlirDialectHandle,
 }
 
+impl_owned_mlir_value!(DialectHandle, MlirDialectHandle);
+
 impl DialectHandle {
-    /// Constructs a [DialectHandle] from the provided raw [MlirDialectHandle] value.
-    ///
-    /// # Safety
-    /// The caller of this function is responsible for ensuring that the provided raw
-    /// [MlirDialectHandle] value is valid.
-    ///
-    /// # Arguments
-    /// * `raw` - The raw [MlirDialectHandle] value.
-    ///
-    /// # Returns
-    /// Returns a new [DialectHandle] instance.
-    pub unsafe fn from_raw(raw: MlirDialectHandle) -> DialectHandle {
-        DialectHandle { raw }
-    }
-
-    /// # Returns
-    /// Returns the raw [MlirDialectHandle] value.
-    pub fn to_raw(&self) -> MlirDialectHandle {
-        self.raw
-    }
-
     /// # Returns
     /// Returns the namespace of the dialect.
     pub fn namespace(&self) -> StringRef {

@@ -78,6 +78,12 @@ impl<'a> From<StringRef<'a>> for &'a str {
     }
 }
 
+impl<'a> PartialEq for StringRef<'a> {
+    fn eq(&self, other: &Self) -> bool {
+        self.as_str() == other.as_str()
+    }
+}
+
 impl<'a, T> PartialEq<T> for StringRef<'a>
 where
     T: AsRef<str>,
@@ -98,3 +104,5 @@ impl<'a> PartialEq<StringRef<'a>> for String {
         self.as_str() == other.as_str()
     }
 }
+
+impl<'a> Eq for StringRef<'a> {}
