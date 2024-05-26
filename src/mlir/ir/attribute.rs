@@ -1,8 +1,9 @@
 mod bool;
 mod float;
 mod integer;
+mod string;
 
-pub use self::{bool::*, float::*, integer::*};
+pub use self::{bool::*, float::*, integer::*, string::*};
 use crate::{
     ir::{IdentifierRef, TypeRef},
     support::{
