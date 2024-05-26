@@ -17,6 +17,10 @@ use mlir_sys::{mlirNoneTypeGet, mlirTypeIsANone, MlirType};
 ///
 /// The following bindings are not used/supported:
 /// - `mlirNoneTypeGetTypeID`
+///
+/// # Safety
+/// This type is ONLY ever safe to use if it is a **reference**! Owned instances will cause
+/// undefined behaviour.
 #[repr(transparent)]
 #[derive(Debug)]
 pub struct NoneTypeRef {

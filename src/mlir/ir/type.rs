@@ -89,7 +89,7 @@ impl Display for TypeRef {
 }
 
 macro_rules! impl_type_variant {
-    ($variant_type: ident, $verify_fn: ident) => {
+    ($variant_type:ident, $verify_fn:ident) => {
         impl $variant_type {
             pub fn try_from_type(ty: &$crate::ir::TypeRef) -> Option<&Self> {
                 let types_match = unsafe { $verify_fn(ty.to_raw()) };

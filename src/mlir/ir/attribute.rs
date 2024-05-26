@@ -1,3 +1,6 @@
+mod integer;
+
+pub use self::integer::*;
 use crate::{
     ir::{IdentifierRef, TypeRef},
     support::{
@@ -158,10 +161,39 @@ impl<'a> NamedAttribute<'a> {
     }
 }
 
+macro_rules! impl_attribute_variant {
+    ($variant_type:ident, $verify_fn:ident) => {
+        impl $variant_type {
+            pub fn try_from_attribute(attr: &$crate::ir::AttributeRef) -> Option<&Self> {
+                let types_match = unsafe { $verify_fn(attr.to_raw()) };
+                if types_match {
+                    Some(unsafe { $variant_type::from_raw(attr.to_raw()) })
+                } else {
+                    None
+                }
+            }
+
+            pub fn as_attribute(&self) -> &$crate::ir::AttributeRef {
+                unsafe { $crate::ir::AttributeRef::from_raw(self.to_raw()) }
+            }
+        }
+
+        impl std::ops::Deref for $variant_type {
+            type Target = $crate::ir::AttributeRef;
+
+            fn deref(&self) -> &Self::Target {
+                self.as_attribute()
+            }
+        }
+    };
+}
+
+use impl_attribute_variant;
+
 #[cfg(test)]
 mod tests {
     use super::*;
-    use crate::{ir::r#type::NoneTypeRef, Context};
+    use crate::{ir::NoneTypeRef, Context};
 
     #[test]
     fn parse_attribute() {
