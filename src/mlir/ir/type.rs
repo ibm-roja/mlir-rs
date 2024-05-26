@@ -1,7 +1,8 @@
+mod float;
 mod integer;
 mod none;
 
-pub use self::{integer::*, none::*};
+pub use self::{float::*, integer::*, none::*};
 use crate::{
     support::{
         binding::{impl_unowned_mlir_value, UnownedMlirValue},

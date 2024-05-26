@@ -1,6 +1,7 @@
+mod float;
 mod integer;
 
-pub use self::integer::*;
+pub use self::{float::*, integer::*};
 use crate::{
     ir::{IdentifierRef, TypeRef},
     support::{
