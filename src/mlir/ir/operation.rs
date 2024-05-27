@@ -1,5 +1,6 @@
 mod builder;
 
+pub use self::builder::OperationBuilder;
 use crate::{
     ir::{AttributeRef, BlockRef, IdentifierRef, LocationRef, NamedAttribute, RegionRef, ValueRef},
     support::{

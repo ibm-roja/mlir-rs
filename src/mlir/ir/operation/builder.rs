@@ -1,13 +1,16 @@
 use crate::{
-    ir::{LocationRef, NamedAttribute, TypeRef, ValueRef},
+    ir::{LocationRef, NamedAttribute, Operation, TypeRef, ValueRef},
+    support::binding::OwnedMlirValue,
     StringRef, UnownedMlirValue,
 };
 
 use std::marker::PhantomData;
 
+use crate::ir::Region;
 use mlir_sys::{
-    mlirOperationStateAddAttributes, mlirOperationStateAddOperands, mlirOperationStateAddResults,
-    mlirOperationStateGet, MlirNamedAttribute, MlirOperationState, MlirType, MlirValue,
+    mlirOperationCreate, mlirOperationStateAddAttributes, mlirOperationStateAddOperands,
+    mlirOperationStateAddOwnedRegions, mlirOperationStateAddResults, mlirOperationStateGet,
+    MlirNamedAttribute, MlirOperationState, MlirRegion, MlirType, MlirValue,
 };
 
 pub struct OperationBuilder<'a> {
@@ -47,7 +50,18 @@ impl<'a> OperationBuilder<'a> {
         self
     }
 
-    // TODO: Add support for regions & successors.
+    pub fn add_regions(mut self, regions: &[Region<'a>]) -> Self {
+        unsafe {
+            mlirOperationStateAddOwnedRegions(
+                &mut self.state as *mut MlirOperationState,
+                regions.len() as isize,
+                regions.as_ptr() as *const MlirRegion,
+            )
+        }
+        self
+    }
+
+    // TODO: Add support for successors.
 
     pub fn add_attributes(mut self, attributes: &[NamedAttribute<'a>]) -> Self {
         unsafe {
@@ -61,4 +75,41 @@ impl<'a> OperationBuilder<'a> {
     }
 
     // TODO: Add support for enabling type inference.
+
+    pub fn build(mut self) -> Option<Operation<'a>> {
+        unsafe {
+            Operation::try_from_raw(mlirOperationCreate(
+                &mut self.state as *mut MlirOperationState,
+            ))
+        }
+    }
+}
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+    use crate::ir::AttributeRef;
+    use crate::{ir::LocationRef, Context};
+
+    #[test]
+    fn build() {
+        let context = Context::new(None, false);
+        context.set_allow_unregistered_dialects(true);
+        let loc = LocationRef::new_unknown(&context);
+        let op = OperationBuilder::new("dialect.op1", loc)
+            .add_attributes(&[AttributeRef::parse(&context, "42 : i32")
+                .unwrap()
+                .with_name("attribute name")])
+            .add_results(&[
+                TypeRef::parse(&context, "i1").unwrap(),
+                TypeRef::parse(&context, "i16").unwrap(),
+            ])
+            .build()
+            .unwrap();
+        assert_eq!(
+            op.to_string(),
+            r#"%0:2 = "dialect.op1"() {"attribute name" = 42 : i32} : () -> (i1, i16)
+"#
+        );
+    }
 }
