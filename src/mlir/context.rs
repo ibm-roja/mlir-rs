@@ -202,6 +202,8 @@ mod tests {
     use super::*;
     use crate::DialectRegistry;
 
+    use std::ops::Deref;
+
     #[test]
     fn new() {
         let context = Context::new(None, false);

@@ -543,13 +543,170 @@ mod tests {
 
     #[test]
     fn parse() {
-        let operation_source = r#"module {
+        #[rustfmt::skip]
+        let operation_source = r#"
+module {
+}
+"#.trim_start();
+        let context = Context::new(None, false);
+        let operation = Operation::parse(&context, operation_source, "test.mlir").unwrap();
+        assert_eq!(operation.to_string(), operation_source);
+    }
+
+    #[test]
+    fn context() {
+        let operation_source = "module {}";
+        let context = Context::new(None, false);
+        let operation = Operation::parse(&context, operation_source, "test.mlir").unwrap();
+        assert_eq!(operation.context(), &context);
+    }
+
+    #[test]
+    fn name() {
+        let operation_source = "module {}";
+        let context = Context::new(None, false);
+        let operation = Operation::parse(&context, operation_source, "test.mlir").unwrap();
+        // TODO: Why does as_str() need to be called here?
+        // Without it, the left hand side of the comparison is the StringRef's debug representation.
+        assert_eq!(operation.name().value().as_str(), "builtin.module");
+    }
+
+    #[test]
+    fn location() {
+        let operation_source = "module {}";
+        let context = Context::new(None, false);
+        let operation = Operation::parse(&context, operation_source, "test.mlir").unwrap();
+        assert_eq!(
+            operation.location(),
+            LocationRef::new_file_line_col(&context, "test.mlir", 1, 1),
+        );
+    }
+
+    #[test]
+    fn parent_operation() {
+        #[rustfmt::skip]
+        let operation_source = r#"
+module {
+    "dialect.op"() : () -> ()
 }
 "#;
         let context = Context::new(None, false);
         context.set_allow_unregistered_dialects(true);
         let operation = Operation::parse(&context, operation_source, "test.mlir").unwrap();
-        assert_eq!(operation.to_string(), operation_source);
+        assert!(operation.parent_operation().is_none());
+        // TODO: Once more region support exists, test this with the nested operation.
+    }
+
+    #[test]
+    fn parent_block() {
+        #[rustfmt::skip]
+        let operation_source = r#"
+module {
+    "dialect.op"() : () -> ()
+}
+"#;
+        let context = Context::new(None, false);
+        context.set_allow_unregistered_dialects(true);
+        let operation = Operation::parse(&context, operation_source, "test.mlir").unwrap();
+        assert!(operation.parent_block().is_none());
+        // TODO: Once more block support exists, test this with the nested operation.
+    }
+
+    #[test]
+    fn remove_from_parent() {
+        #[rustfmt::skip]
+        let operation_source = r#"
+module {
+    "dialect.op"() : () -> ()
+}
+"#;
+        let context = Context::new(None, false);
+        context.set_allow_unregistered_dialects(true);
+        let operation = Operation::parse(&context, operation_source, "test.mlir").unwrap();
+        // TODO: Once more block support exists, test this with the nested operation.
+    }
+
+    // TODO: test `move_after` and `move_before`
+
+    #[test]
+    fn next_in_parent_block() {
+        #[rustfmt::skip]
+        let operation_source = r#"
+module {
+    "dialect.op1"() : () -> ()
+    "dialect.op2"() : () -> ()
+}
+"#;
+        let context = Context::new(None, false);
+        context.set_allow_unregistered_dialects(true);
+        let operation = Operation::parse(&context, operation_source, "test.mlir").unwrap();
+        assert!(operation.next_in_parent_block().is_none());
+        // TODO: Once more block support exists, test this with the nested operation.
+    }
+
+    #[test]
+    fn num_operands() {
+        #[rustfmt::skip]
+        let operation_source = r#"
+module {
+    %0:2 = "dialect.op1"() {"attribute name" = 42 : i32} : () -> (i1, i16)
+    "dialect.op2"(%0#0, %0#1) : (i1, i16) -> ()
+}
+"#;
+        let context = Context::new(None, false);
+        context.set_allow_unregistered_dialects(true);
+        let operation = Operation::parse(&context, operation_source, "test.mlir").unwrap();
+        let _region = operation.region(0);
+        // TODO: once more region support exists, test this with the nested operation.
+    }
+
+    #[test]
+    fn get_operands() {
+        #[rustfmt::skip]
+        let operation_source = r#"
+module {
+    %0:2 = "dialect.op1"() {"attribute name" = 42 : i32} : () -> (i1, i16)
+    "dialect.op2"(%0#0, %0#1) : (i1, i16) -> ()
+}
+"#;
+        let context = Context::new(None, false);
+        context.set_allow_unregistered_dialects(true);
+        let operation = Operation::parse(&context, operation_source, "test.mlir").unwrap();
+        let _region = operation.region(0);
+        // TODO: once more region support exists, test this with the nested operation.
+    }
+
+    // TODO: this should panic
+    #[test]
+    fn get_operand_out_of_bounds() {
+        #[rustfmt::skip]
+        let operation_source = r#"
+module {
+    %0:2 = "dialect.op1"() {"attribute name" = 42 : i32} : () -> (i1, i16)
+    "dialect.op2"(%0#0, %0#1) : (i1, i16) -> ()
+}
+"#;
+        let context = Context::new(None, false);
+        context.set_allow_unregistered_dialects(true);
+        let operation = Operation::parse(&context, operation_source, "test.mlir").unwrap();
+        let _region = operation.region(0);
+        // TODO: once more region support exists, test this with the nested operation.
+    }
+
+    #[test]
+    fn set_operand() {
+        #[rustfmt::skip]
+        let operation_source = r#"
+module {
+    %0:2 = "dialect.op1"() {"attribute name" = 42 : i32} : () -> (i1, i16)
+    "dialect.op2"(%0#0, %0#1) : (i1, i16) -> ()
+}
+"#;
+        let context = Context::new(None, false);
+        context.set_allow_unregistered_dialects(true);
+        let operation = Operation::parse(&context, operation_source, "test.mlir").unwrap();
+        let _region = operation.region(0);
+        // TODO: once more region support exists, test this with the nested operation.
     }
 
     #[test]
