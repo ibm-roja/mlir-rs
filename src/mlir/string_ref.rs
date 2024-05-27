@@ -1,3 +1,4 @@
+use std::ffi::CString;
 use std::{marker::PhantomData, os::raw::c_char, slice, str};
 
 use mlir_sys::MlirStringRef;
@@ -36,6 +37,25 @@ impl<'a> StringRef<'a> {
         self.raw
     }
 
+    /// Constructs a [StringRef] from the provided reference to a [CString], ensuring that the
+    /// string is null-terminated.
+    ///
+    /// # Arguments
+    /// * `cstr` - The [CString] holding the backing data for the string.
+    ///
+    /// # Returns
+    /// Returns a new [StringRef] instance.
+    pub fn from_cstring(cstr: &'a CString) -> StringRef<'a> {
+        let bytes = cstr.to_bytes_with_nul();
+        Self {
+            raw: MlirStringRef {
+                data: bytes.as_ptr() as *const c_char,
+                length: bytes.len() - 1,
+            },
+            _string_owner: PhantomData,
+        }
+    }
+
     /// # Returns
     /// Returns the [StringRef] as a `&str`.
     pub fn as_str(&self) -> &'a str {
@@ -64,7 +84,7 @@ where
             // An [MLIRStringRef] does not need to be null-terminated, so using the Rust string's
             // data directly is safe.
             raw: MlirStringRef {
-                data: value.as_ptr() as *const c_char,
+                data: value.as_bytes().as_ptr() as *const c_char,
                 length: value.len(),
             },
             _string_owner: PhantomData,

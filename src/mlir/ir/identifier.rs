@@ -24,7 +24,7 @@ pub struct IdentifierRef {
     _prevent_external_instantiation: PhantomData<()>,
 }
 
-impl_unowned_mlir_value!(IdentifierRef, MlirIdentifier);
+impl_unowned_mlir_value!(no_refs, IdentifierRef, MlirIdentifier);
 
 impl IdentifierRef {
     /// Constructs a new [IdentifierRef] from the provided string.

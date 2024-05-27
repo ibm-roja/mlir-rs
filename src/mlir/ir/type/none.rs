@@ -27,7 +27,7 @@ pub struct NoneTypeRef {
     _prevent_external_instantiation: PhantomData<()>,
 }
 
-impl_unowned_mlir_value!(NoneTypeRef, MlirType);
+impl_unowned_mlir_value!(no_refs, NoneTypeRef, MlirType);
 impl_type_variant!(NoneTypeRef, mlirTypeIsANone);
 
 impl NoneTypeRef {

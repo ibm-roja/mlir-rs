@@ -48,7 +48,7 @@ pub struct AttributeRef {
     _prevent_external_instantiation: PhantomData<()>,
 }
 
-impl_unowned_mlir_value!(AttributeRef, MlirAttribute);
+impl_unowned_mlir_value!(no_refs, AttributeRef, MlirAttribute);
 
 impl AttributeRef {
     /// Attempts to parse an attribute from the provided string.

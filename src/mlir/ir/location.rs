@@ -41,7 +41,7 @@ pub struct LocationRef {
     _prevent_external_instantiation: PhantomData<()>,
 }
 
-impl_unowned_mlir_value!(LocationRef, MlirLocation);
+impl_unowned_mlir_value!(no_refs, LocationRef, MlirLocation);
 
 impl LocationRef {
     /// Constructs a new [LocationRef] representing a file, line number, and column number.
@@ -96,12 +96,11 @@ impl LocationRef {
         locations: &[&'a LocationRef],
         metadata: &'a AttributeRef,
     ) -> &'a Self {
-        let locations = locations.iter().map(|l| l.to_raw()).collect::<Vec<_>>();
         unsafe {
             Self::from_raw(mlirLocationFusedGet(
                 context.to_raw(),
                 locations.len() as isize,
-                locations.as_ptr(),
+                locations.as_ptr() as *const MlirLocation,
                 metadata.to_raw(),
             ))
         }

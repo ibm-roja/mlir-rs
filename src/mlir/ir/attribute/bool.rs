@@ -25,7 +25,7 @@ pub struct BoolAttributeRef {
     _prevent_external_instantiation: PhantomData<()>,
 }
 
-impl_unowned_mlir_value!(BoolAttributeRef, MlirAttribute);
+impl_unowned_mlir_value!(no_refs, BoolAttributeRef, MlirAttribute);
 impl_attribute_variant!(BoolAttributeRef, mlirAttributeIsABool);
 
 impl BoolAttributeRef {

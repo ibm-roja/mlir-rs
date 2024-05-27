@@ -33,7 +33,7 @@ pub struct IntegerAttributeRef {
     _prevent_external_instantiation: PhantomData<()>,
 }
 
-impl_unowned_mlir_value!(IntegerAttributeRef, MlirAttribute);
+impl_unowned_mlir_value!(no_refs, IntegerAttributeRef, MlirAttribute);
 impl_attribute_variant!(IntegerAttributeRef, mlirAttributeIsAInteger);
 
 impl IntegerAttributeRef {

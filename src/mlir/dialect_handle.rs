@@ -22,7 +22,7 @@ pub struct DialectHandle {
     raw: MlirDialectHandle,
 }
 
-impl_owned_mlir_value!(DialectHandle, MlirDialectHandle);
+impl_owned_mlir_value!(no_refs, DialectHandle, MlirDialectHandle);
 
 impl DialectHandle {
     /// # Returns

@@ -3,7 +3,7 @@ use crate::{
     DialectRef, DialectRegistryRef, StringRef,
 };
 
-use std::{marker::PhantomData, ops::Deref};
+use std::marker::PhantomData;
 
 use mlir_sys::{
     mlirContextAppendDialectRegistry, mlirContextCreateWithRegistry,
@@ -43,7 +43,7 @@ pub struct Context {
     raw: MlirContext,
 }
 
-impl_owned_mlir_value!(Context, MlirContext);
+impl_owned_mlir_value!(no_refs, Context, MlirContext);
 
 impl Context {
     /// Creates a new MLIR Context.
@@ -97,7 +97,7 @@ pub struct ContextRef {
     _prevent_external_instantiation: PhantomData<()>,
 }
 
-impl_unowned_mlir_value!(Context, ContextRef, MlirContext);
+impl_unowned_mlir_value!(no_refs, Context, ContextRef, MlirContext);
 
 impl ContextRef {
     /// # Returns

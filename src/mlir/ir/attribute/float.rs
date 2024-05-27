@@ -32,7 +32,7 @@ pub struct FloatAttributeRef {
     _prevent_external_instantiation: PhantomData<()>,
 }
 
-impl_unowned_mlir_value!(FloatAttributeRef, MlirAttribute);
+impl_unowned_mlir_value!(no_refs, FloatAttributeRef, MlirAttribute);
 impl_attribute_variant!(FloatAttributeRef, mlirAttributeIsAFloat);
 
 impl FloatAttributeRef {

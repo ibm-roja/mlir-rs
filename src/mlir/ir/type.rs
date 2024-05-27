@@ -40,7 +40,7 @@ pub struct TypeRef {
     _prevent_external_instantiation: PhantomData<()>,
 }
 
-impl_unowned_mlir_value!(TypeRef, MlirType);
+impl_unowned_mlir_value!(no_refs, TypeRef, MlirType);
 
 impl TypeRef {
     /// Attempts to parse a type from the provided string.

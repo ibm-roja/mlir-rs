@@ -48,7 +48,7 @@ unsafe fn mlir_type_is_a_float(ty: MlirType) -> bool {
     mlirTypeIsAF32(ty) || mlirTypeIsAF64(ty)
 }
 
-impl_unowned_mlir_value!(FloatTypeRef, MlirType);
+impl_unowned_mlir_value!(no_refs, FloatTypeRef, MlirType);
 impl_type_variant!(FloatTypeRef, mlir_type_is_a_float);
 
 impl FloatTypeRef {

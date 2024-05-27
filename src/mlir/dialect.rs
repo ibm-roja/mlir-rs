@@ -24,7 +24,7 @@ pub struct DialectRef {
     _prevent_external_instantiation: PhantomData<()>,
 }
 
-impl_unowned_mlir_value!(DialectRef, MlirDialect);
+impl_unowned_mlir_value!(no_refs, DialectRef, MlirDialect);
 
 impl DialectRef {
     /// # Returns

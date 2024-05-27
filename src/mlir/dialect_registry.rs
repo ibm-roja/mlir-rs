@@ -1,6 +1,6 @@
 use crate::support::binding::{impl_owned_mlir_value, impl_unowned_mlir_value, UnownedMlirValue};
 
-use std::{marker::PhantomData, ops::Deref};
+use std::marker::PhantomData;
 
 use mlir_sys::{
     mlirDialectRegistryCreate, mlirDialectRegistryDestroy, mlirRegisterAllDialects,
@@ -20,7 +20,7 @@ pub struct DialectRegistry {
     raw: MlirDialectRegistry,
 }
 
-impl_owned_mlir_value!(DialectRegistry, MlirDialectRegistry);
+impl_owned_mlir_value!(no_refs, DialectRegistry, MlirDialectRegistry);
 
 impl Default for DialectRegistry {
     fn default() -> Self {
@@ -47,7 +47,12 @@ pub struct DialectRegistryRef {
     _prevent_external_instantiation: PhantomData<()>,
 }
 
-impl_unowned_mlir_value!(DialectRegistry, DialectRegistryRef, MlirDialectRegistry);
+impl_unowned_mlir_value!(
+    no_refs,
+    DialectRegistry,
+    DialectRegistryRef,
+    MlirDialectRegistry
+);
 
 impl DialectRegistryRef {
     /// Registers all dialects known to MLIR with the dialect registry.

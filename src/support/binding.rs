@@ -92,7 +92,7 @@ where
 }
 
 macro_rules! impl_owned_mlir_value {
-    ($owning_type:ty, $binding:ty) => {
+    (no_refs, $owning_type:ident, $binding:ty) => {
         impl $crate::support::binding::OwnedMlirValue for $owning_type {
             type Binding = $binding;
 
@@ -113,18 +113,18 @@ macro_rules! impl_owned_mlir_value {
             }
         }
     };
-}
-
-macro_rules! impl_unowned_mlir_value {
-    ($ref_type:ty, $binding:ty) => {
-        impl $crate::support::binding::UnownedMlirValue for $ref_type {
+    (context_ref, $owning_type:ident, $binding:ty) => {
+        impl<'c> $crate::support::binding::OwnedMlirValue for $owning_type<'c> {
             type Binding = $binding;
 
-            unsafe fn from_raw<'a>(raw: Self::Binding) -> &'a Self {
-                std::mem::transmute(raw)
+            unsafe fn from_raw(raw: Self::Binding) -> Self {
+                Self {
+                    raw,
+                    _context: std::marker::PhantomData,
+                }
             }
 
-            unsafe fn try_from_raw<'a>(raw: Self::Binding) -> Option<&'a Self> {
+            unsafe fn try_from_raw(raw: Self::Binding) -> Option<Self> {
                 if raw.ptr.is_null() {
                     None
                 } else {
@@ -133,21 +133,60 @@ macro_rules! impl_unowned_mlir_value {
             }
 
             fn to_raw(&self) -> Self::Binding {
-                unsafe { std::mem::transmute(self) }
-            }
-        }
-
-        impl Drop for $ref_type {
-            fn drop(&mut self) {
-                panic!(
-                    "Owned instances of {} should never be created!",
-                    stringify!($ref_type)
-                )
+                self.raw
             }
         }
     };
-    ($owning_type:ty, $ref_type:ident, $binding:ty) => {
-        impl Deref for $owning_type {
+}
+
+macro_rules! impl_unowned_mlir_value {
+    (_value_impl, $ref_type:ident, $binding:ty) => {
+        type Binding = $binding;
+
+        unsafe fn from_raw<'a>(raw: Self::Binding) -> &'a Self {
+            std::mem::transmute(raw)
+        }
+
+        unsafe fn try_from_raw<'a>(raw: Self::Binding) -> Option<&'a Self> {
+            if raw.ptr.is_null() {
+                None
+            } else {
+                Some(Self::from_raw(raw))
+            }
+        }
+
+        fn to_raw(&self) -> Self::Binding {
+            unsafe { std::mem::transmute(self) }
+        }
+    };
+    (_drop_impl, $ref_type:ident, $binding:ty) => {
+        fn drop(&mut self) {
+            panic!(
+                "Owned instances of {} should never be created!",
+                stringify!($ref_type)
+            );
+        }
+    };
+    (no_refs, $ref_type:ident, $binding:ty) => {
+        impl $crate::support::binding::UnownedMlirValue for $ref_type {
+            impl_unowned_mlir_value!(_value_impl, $ref_type, $binding);
+        }
+
+        impl Drop for $ref_type {
+            impl_unowned_mlir_value!(_drop_impl, $ref_type, $binding);
+        }
+    };
+    (context_ref, $ref_type:ident, $binding:ty) => {
+        impl<'c> $crate::support::binding::UnownedMlirValue for $ref_type<'c> {
+            impl_unowned_mlir_value!(_value_impl, $ref_type, $binding);
+        }
+
+        impl<'c> Drop for $ref_type<'c> {
+            impl_unowned_mlir_value!(_drop_impl, $ref_type, $binding);
+        }
+    };
+    (no_refs, $owning_type:ident, $ref_type:ident, $binding:ty) => {
+        impl std::ops::Deref for $owning_type {
             type Target = $ref_type;
 
             fn deref(&self) -> &Self::Target {
@@ -155,7 +194,18 @@ macro_rules! impl_unowned_mlir_value {
             }
         }
 
-        impl_unowned_mlir_value!($ref_type, $binding);
+        impl_unowned_mlir_value!(no_refs, $ref_type, $binding);
+    };
+    (context_ref, $owning_type:ident, $ref_type:ident, $binding:ty) => {
+        impl<'c> std::ops::Deref for $owning_type<'c> {
+            type Target = $ref_type<'c>;
+
+            fn deref(&self) -> &Self::Target {
+                unsafe { $ref_type::from_raw(self.raw) }
+            }
+        }
+
+        impl_unowned_mlir_value!(context_ref, $ref_type, $binding);
     };
 }
 
