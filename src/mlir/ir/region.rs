@@ -92,7 +92,7 @@ impl<'c> RegionRef<'c> {
     ///
     /// # Returns
     /// Returns a reference to the appended block owned by the region.
-    pub fn append_block(&self, block: Block<'c>) -> &BlockRef<'c> {
+    pub fn append_block<'a>(&'a self, block: Block<'c>) -> &'a BlockRef<'c> {
         let block_ref = unsafe { BlockRef::from_raw(block.to_raw()) };
         unsafe { mlirRegionAppendOwnedBlock(self.to_raw(), block_ref.to_raw()) };
         block_ref

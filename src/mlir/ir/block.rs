@@ -112,7 +112,7 @@ impl<'c> BlockRef<'c> {
     ///
     /// # Returns
     /// Returns a reference to the appended operation owned by the block.
-    pub fn append_operation(&self, operation: Operation<'c>) -> &OperationRef<'c> {
+    pub fn append_operation<'a>(&'a self, operation: Operation<'c>) -> &'a OperationRef<'c> {
         let operation_ref = unsafe { OperationRef::from_raw(operation.to_raw()) };
         unsafe { mlirBlockAppendOwnedOperation(self.to_raw(), operation.to_raw()) };
         operation_ref
