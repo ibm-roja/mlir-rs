@@ -13,16 +13,18 @@ use std::{
     marker::PhantomData,
 };
 
+use crate::ir::Operation;
 use mlir_sys::{
-    mlirBlockCreate, mlirBlockDestroy, mlirBlockEqual, mlirBlockGetArgument,
-    mlirBlockGetFirstOperation, mlirBlockGetNextInRegion, mlirBlockGetNumArguments,
-    mlirBlockGetParentOperation, mlirBlockGetParentRegion, mlirBlockGetTerminator, mlirBlockPrint,
-    MlirBlock, MlirLocation, MlirType,
+    mlirBlockAppendOwnedOperation, mlirBlockCreate, mlirBlockDestroy, mlirBlockEqual,
+    mlirBlockGetArgument, mlirBlockGetFirstOperation, mlirBlockGetNextInRegion,
+    mlirBlockGetNumArguments, mlirBlockGetParentOperation, mlirBlockGetParentRegion,
+    mlirBlockGetTerminator, mlirBlockPrint, MlirBlock, MlirLocation, MlirType,
 };
 
 /// [Block] wraps the `mlir::Block` class, which represents a block of operations in the MLIR IR.
 ///
 /// The following bindings into the MLIR C API are used/supported:
+/// - `mlirBlockAppendOwnedOperation`
 /// - `mlirBlockCreate`
 /// - `mlirBlockDestroy`
 /// - `mlirBlockEqual`
@@ -37,7 +39,6 @@ use mlir_sys::{
 ///
 /// The following bindings are not used/supported:
 /// - `mlirBlockAddArgument`
-/// - `mlirBlockAppendOwnedOperation`
 /// - `mlirBlockArgumentGetArgNumber`
 /// - `mlirBlockArgumentGetOwner`
 /// - `mlirBlockArgumentSetType`
@@ -105,6 +106,19 @@ pub struct BlockRef<'c> {
 impl_unowned_mlir_value!(context_ref, Block, BlockRef, MlirBlock);
 
 impl<'c> BlockRef<'c> {
+    /// Appends the given operation to the block.
+    ///
+    /// # Arguments
+    /// * `operation` - The operation to append to the block.
+    ///
+    /// # Returns
+    /// Returns a reference to the appended operation owned by the block.
+    pub fn append_operation(&self, operation: Operation<'c>) -> &OperationRef<'c> {
+        let operation_ref = unsafe { OperationRef::from_raw(operation.to_raw()) };
+        unsafe { mlirBlockAppendOwnedOperation(self.to_raw(), operation.to_raw()) };
+        operation_ref
+    }
+
     /// # Returns
     /// Returns the number of arguments the block has.
     pub fn num_arguments(&self) -> isize {
