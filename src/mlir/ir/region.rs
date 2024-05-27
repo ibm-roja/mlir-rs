@@ -1,5 +1,5 @@
 use crate::{
-    ir::BlockRef,
+    ir::{Block, BlockRef},
     support::binding::{
         impl_owned_mlir_value, impl_unowned_mlir_value, OwnedMlirValue, UnownedMlirValue,
     },
@@ -9,13 +9,14 @@ use crate::{
 use std::marker::PhantomData;
 
 use mlir_sys::{
-    mlirRegionCreate, mlirRegionDestroy, mlirRegionEqual, mlirRegionGetFirstBlock,
-    mlirRegionGetNextInOperation, MlirRegion,
+    mlirRegionAppendOwnedBlock, mlirRegionCreate, mlirRegionDestroy, mlirRegionEqual,
+    mlirRegionGetFirstBlock, mlirRegionGetNextInOperation, MlirRegion,
 };
 
 /// [Region] wraps the `mlir::Region` class, which represents a region of blocks in the MLIR IR.
 ///
 /// The following bindings into the MLIR C API are used/supported:
+/// - `mlirRegionAppendOwnedBlock`
 /// - `mlirRegionCreate`
 /// - `mlirRegionDestroy`
 /// - `mlirRegionEqual`
@@ -23,7 +24,6 @@ use mlir_sys::{
 /// - `mlirRegionGetNextInOperation`
 ///
 /// The following bindings are not used/supported:
-/// - `mlirRegionAppendOwnedBlock`
 /// - `mlirRegionInsertOwnedBlock`
 /// - `mlirRegionInsertOwnedBlockAfter`
 /// - `mlirRegionInsertOwnedBlockBefore`
@@ -85,6 +85,19 @@ pub struct RegionRef<'c> {
 impl_unowned_mlir_value!(context_ref, Region, RegionRef, MlirRegion);
 
 impl<'c> RegionRef<'c> {
+    /// Appends the given block to the region.
+    ///
+    /// # Arguments
+    /// * `block` - The block to append to the region.
+    ///
+    /// # Returns
+    /// Returns a reference to the appended block owned by the region.
+    pub fn append_block(&self, block: Block<'c>) -> &BlockRef<'c> {
+        let block_ref = unsafe { BlockRef::from_raw(block.to_raw()) };
+        unsafe { mlirRegionAppendOwnedBlock(self.to_raw(), block_ref.to_raw()) };
+        block_ref
+    }
+
     /// # Returns
     /// Returns the first block of the region, if it has one.
     pub fn first_block(&self) -> Option<&BlockRef<'c>> {

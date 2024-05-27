@@ -1,5 +1,5 @@
 use crate::{
-    ir::{LocationRef, OperationRef, RegionRef, TypeRef, ValueRef},
+    ir::{LocationRef, Operation, OperationRef, RegionRef, TypeRef, ValueRef},
     support::{
         binding::{
             impl_owned_mlir_value, impl_unowned_mlir_value, OwnedMlirValue, UnownedMlirValue,
@@ -13,7 +13,6 @@ use std::{
     marker::PhantomData,
 };
 
-use crate::ir::Operation;
 use mlir_sys::{
     mlirBlockAppendOwnedOperation, mlirBlockCreate, mlirBlockDestroy, mlirBlockEqual,
     mlirBlockGetArgument, mlirBlockGetFirstOperation, mlirBlockGetNextInRegion,
