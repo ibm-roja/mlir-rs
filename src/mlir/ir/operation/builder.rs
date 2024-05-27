@@ -28,7 +28,7 @@ impl<'a> OperationBuilder<'a> {
         }
     }
 
-    pub fn add_results(mut self, types: &[&'a TypeRef]) -> Self {
+    pub fn add_results(mut self, types: &[&TypeRef]) -> Self {
         unsafe {
             mlirOperationStateAddResults(
                 &mut self.state as *mut MlirOperationState,
@@ -39,7 +39,7 @@ impl<'a> OperationBuilder<'a> {
         self
     }
 
-    pub fn add_operands(mut self, operands: &[&'a ValueRef]) -> Self {
+    pub fn add_operands(mut self, operands: &[&ValueRef]) -> Self {
         unsafe {
             mlirOperationStateAddOperands(
                 &mut self.state as *mut MlirOperationState,
@@ -50,7 +50,7 @@ impl<'a> OperationBuilder<'a> {
         self
     }
 
-    pub fn add_regions(mut self, regions: &[Region<'a>]) -> Self {
+    pub fn add_regions(mut self, regions: &[Region]) -> Self {
         unsafe {
             mlirOperationStateAddOwnedRegions(
                 &mut self.state as *mut MlirOperationState,
@@ -63,7 +63,7 @@ impl<'a> OperationBuilder<'a> {
 
     // TODO: Add support for successors.
 
-    pub fn add_attributes(mut self, attributes: &[NamedAttribute<'a>]) -> Self {
+    pub fn add_attributes(mut self, attributes: &[NamedAttribute]) -> Self {
         unsafe {
             mlirOperationStateAddAttributes(
                 &mut self.state as *mut MlirOperationState,
