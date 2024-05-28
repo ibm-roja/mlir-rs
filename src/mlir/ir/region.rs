@@ -6,7 +6,7 @@ use crate::{
     ContextRef,
 };
 
-use std::marker::PhantomData;
+use std::{marker::PhantomData, mem::forget};
 
 use mlir_sys::{
     mlirRegionAppendOwnedBlock, mlirRegionCreate, mlirRegionDestroy, mlirRegionEqual,
@@ -95,6 +95,7 @@ impl<'c> RegionRef<'c> {
     pub fn append_block<'a>(&'a self, block: Block<'c>) -> &'a BlockRef<'c> {
         let block_ref = unsafe { BlockRef::from_raw(block.to_raw()) };
         unsafe { mlirRegionAppendOwnedBlock(self.to_raw(), block_ref.to_raw()) };
+        forget(block);
         block_ref
     }
 

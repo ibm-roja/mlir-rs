@@ -4,7 +4,7 @@ use crate::{
     StringRef, UnownedMlirValue,
 };
 
-use std::marker::PhantomData;
+use std::{marker::PhantomData, mem::forget};
 
 use mlir_sys::{
     mlirOperationCreate, mlirOperationStateAddAttributes, mlirOperationStateAddOperands,
@@ -49,7 +49,7 @@ impl<'a> OperationBuilder<'a> {
         self
     }
 
-    pub fn add_regions(mut self, regions: &[Region]) -> Self {
+    pub fn add_regions(mut self, regions: Vec<Region>) -> Self {
         unsafe {
             mlirOperationStateAddOwnedRegions(
                 &mut self.state as *mut MlirOperationState,
@@ -57,6 +57,7 @@ impl<'a> OperationBuilder<'a> {
                 regions.as_ptr() as *const MlirRegion,
             )
         }
+        forget(regions);
         self
     }
 

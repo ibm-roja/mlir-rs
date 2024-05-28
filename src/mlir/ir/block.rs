@@ -11,6 +11,7 @@ use crate::{
 use std::{
     fmt::{Display, Formatter},
     marker::PhantomData,
+    mem::forget,
 };
 
 use mlir_sys::{
@@ -115,6 +116,7 @@ impl<'c> BlockRef<'c> {
     pub fn append_operation<'a>(&'a self, operation: Operation<'c>) -> &'a OperationRef<'c> {
         let operation_ref = unsafe { OperationRef::from_raw(operation.to_raw()) };
         unsafe { mlirBlockAppendOwnedOperation(self.to_raw(), operation.to_raw()) };
+        forget(operation);
         operation_ref
     }
 
