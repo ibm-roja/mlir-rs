@@ -460,7 +460,7 @@ impl<'c> OperationRef<'c> {
     ///
     /// # Returns
     /// Returns the attribute as a name-value pair.
-    pub fn attribute_at(&self, idx: isize) -> NamedAttribute {
+    pub fn attribute_at(&self, idx: isize) -> NamedAttribute<'c> {
         if idx >= self.num_attributes() {
             panic!("Attribute index {} out of bounds.", idx);
         }
@@ -477,7 +477,7 @@ impl<'c> OperationRef<'c> {
     ///
     /// # Returns
     /// Returns a reference to the attribute, if it exists.
-    pub fn attribute(&self, name: &str) -> Option<&AttributeRef> {
+    pub fn attribute(&self, name: &str) -> Option<&'c AttributeRef> {
         unsafe {
             AttributeRef::try_from_raw(mlirOperationGetAttributeByName(
                 self.to_raw(),
