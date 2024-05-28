@@ -1,12 +1,11 @@
 use crate::{
-    ir::{LocationRef, NamedAttribute, Operation, TypeRef, ValueRef},
+    ir::{LocationRef, NamedAttribute, Operation, Region, TypeRef, ValueRef},
     support::binding::OwnedMlirValue,
     StringRef, UnownedMlirValue,
 };
 
 use std::marker::PhantomData;
 
-use crate::ir::Region;
 use mlir_sys::{
     mlirOperationCreate, mlirOperationStateAddAttributes, mlirOperationStateAddOperands,
     mlirOperationStateAddOwnedRegions, mlirOperationStateAddResults, mlirOperationStateGet,

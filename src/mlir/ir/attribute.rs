@@ -1,9 +1,10 @@
 mod bool;
+mod dense_i32;
 mod float;
 mod integer;
 mod string;
 
-pub use self::{bool::*, float::*, integer::*, string::*};
+pub use self::{bool::*, dense_i32::*, float::*, integer::*, string::*};
 use crate::{
     ir::{IdentifierRef, TypeRef},
     support::{
