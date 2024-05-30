@@ -8,8 +8,9 @@ use std::{marker::PhantomData, mem::forget};
 
 use mlir_sys::{
     mlirOperationCreate, mlirOperationStateAddAttributes, mlirOperationStateAddOperands,
-    mlirOperationStateAddOwnedRegions, mlirOperationStateAddResults, mlirOperationStateGet,
-    MlirNamedAttribute, MlirOperationState, MlirRegion, MlirType, MlirValue,
+    mlirOperationStateAddOwnedRegions, mlirOperationStateAddResults,
+    mlirOperationStateEnableResultTypeInference, mlirOperationStateGet, MlirNamedAttribute,
+    MlirOperationState, MlirRegion, MlirType, MlirValue,
 };
 
 pub struct OperationBuilder<'a> {
@@ -74,7 +75,12 @@ impl<'a> OperationBuilder<'a> {
         self
     }
 
-    // TODO: Add support for enabling type inference.
+    pub fn enable_result_type_inference(mut self) -> Self {
+        unsafe {
+            mlirOperationStateEnableResultTypeInference(&mut self.state as *mut MlirOperationState)
+        }
+        self
+    }
 
     pub fn build(mut self) -> Option<Operation<'a>> {
         unsafe {
