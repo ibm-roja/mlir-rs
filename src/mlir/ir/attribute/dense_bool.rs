@@ -74,7 +74,6 @@ impl DenseBoolAttributeRef {
         assert!(index < self.len());
         unsafe {  mlirDenseBoolArrayGetElement(self.to_raw(), index) }
     }
-
 }
 
 #[cfg(test)]
@@ -95,4 +94,3 @@ mod tests {
         };
     }
 }
-
