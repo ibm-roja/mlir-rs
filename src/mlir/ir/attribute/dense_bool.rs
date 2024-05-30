@@ -8,7 +8,7 @@ use std::marker::PhantomData;
 
 use mlir_sys::{
     mlirAttributeIsADenseBoolArray, mlirDenseArrayGetNumElements,
-    mlirDenseBoolArrayGet, mlirDenseBoolArrayGetElement, MlirAttribute
+    mlirDenseBoolArrayGetElement, mlirDenseBoolArrayGet, MlirAttribute
 };
 
 /// [DenseBoolAttributeRef] is a reference to an instance of the `mlir::DenseBoolArrayAttr`, which
@@ -54,6 +54,12 @@ impl DenseBoolAttributeRef {
     /// Returns the length of the array.
     pub fn len(&self) -> isize {
         unsafe { mlirDenseArrayGetNumElements(self.to_raw()) }
+    }
+
+    /// # Returns
+    /// Returns whether the array is empty.
+    pub fn is_empty(&self) -> bool {
+        self.len() == 0
     }
 
     /// Gets the element at the provided index, verifying that the index is within bounds.
