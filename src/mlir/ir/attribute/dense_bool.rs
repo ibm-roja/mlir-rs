@@ -4,7 +4,7 @@ use crate::{
     ContextRef, UnownedMlirValue,
 };
 
-use std::marker::PhantomData;
+use std::{marker::PhantomData, os::raw::c_int};
 
 use mlir_sys::{
     mlirAttributeIsADenseBoolArray, mlirDenseArrayGetNumElements,
@@ -40,12 +40,13 @@ impl DenseBoolAttributeRef {
     ///
     /// # Returns
     /// Returns a reference to a new [DenseBoolAttributeRef] instance.
-    pub fn new<'a>(context: &'a ContextRef, values: &[i32]) -> &'a Self {
+    pub fn new<'a>(context: &'a ContextRef, values: &[bool]) -> &'a Self {
+        let int_values: Vec<c_int> = values.iter().map(|&b| if b { 1 } else { 0 }).collect();
         unsafe {
             Self::from_raw(mlirDenseBoolArrayGet(
                 context.to_raw(),
                 values.len() as isize,
-                values.as_ptr(),
+                int_values.as_ptr(),
             ))
         }
     }
@@ -74,5 +75,24 @@ impl DenseBoolAttributeRef {
         unsafe {  mlirDenseBoolArrayGetElement(self.to_raw(), index) }
     }
 
+}
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+    use crate::Context;
+
+    #[test]
+    fn test_dense_bool_attribute() {
+        let context = Context::new(None, false);
+        {
+            let values = [true, false, true];
+            let attr = DenseBoolAttributeRef::new(&context, &values);
+            assert_eq!(attr.len(), 3);
+            assert_eq!(attr.get(0), true);
+            assert_eq!(attr.get(1), false);
+            assert_eq!(attr.get(2), true);
+        };
+    }
 }
 
