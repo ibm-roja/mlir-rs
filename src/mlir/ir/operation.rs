@@ -121,6 +121,8 @@ impl<'c> Operation<'c> {
         let source = CString::new(source).expect("Failed to convert source string to CString");
         let source_ref = StringRef::from_cstring(&source).to_raw();
         let source_filename_ref = StringRef::from(&source_filename).to_raw();
+        println!("source_ref: {:?}", source_ref);
+        println!("source_filename_ref: {:?}", source_filename_ref);
         unsafe {
             Self::try_from_raw(mlirOperationCreateParse(
                 context.to_raw(),
