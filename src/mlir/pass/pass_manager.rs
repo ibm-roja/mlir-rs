@@ -1,9 +1,9 @@
-use std::marker::PhantomData;
-use mlir_sys::{MlirPassManager, mlirPassManagerAddOwnedPass, mlirPassManagerRunOnOp};
-use crate::{Context, ContextRef, OwnedMlirValue, UnownedMlirValue};
 use crate::ir::Operation;
 use crate::mlir::logical_result::LogicalResult;
 use crate::pass::Pass;
+use crate::{Context, ContextRef, OwnedMlirValue, UnownedMlirValue};
+use mlir_sys::{mlirPassManagerAddOwnedPass, mlirPassManagerRunOnOp, MlirPassManager};
+use std::marker::PhantomData;
 
 /// A PassManager is the top-level entry point for managing a set of optimization passes over a module.
 /// It is responsible for scheduling and running the passes.
@@ -12,7 +12,7 @@ pub struct PassManager {
     _context: PhantomData<Context>,
 }
 
-impl PassManager{
+impl PassManager {
     /// Creates a new pass manager.
     pub fn new(context: &ContextRef) -> Self {
         let raw = unsafe { mlir_sys::mlirPassManagerCreate(context.to_raw()) };
@@ -34,19 +34,21 @@ impl PassManager{
     }
 
     /// Runs the passes added to the pass manager against any module
-    pub fn run(&self, op: &Operation){
-        let result = unsafe {
-            LogicalResult::from_raw(mlirPassManagerRunOnOp(self.raw, op.to_raw()))
-        };
+    pub fn run(&self, op: &Operation) {
+        let result =
+            unsafe { LogicalResult::from_raw(mlirPassManagerRunOnOp(self.raw, op.to_raw())) };
 
-        assert!(result.succeeded(), "PassManager failed to run passes on the operation");
+        assert!(
+            result.succeeded(),
+            "PassManager failed to run passes on the operation"
+        );
     }
 }
 
 #[cfg(test)]
 mod tests {
-    use crate::pass::transforms;
     use super::*;
+    use crate::pass::transforms;
 
     #[test]
     fn create_destroy_pass_manager() {

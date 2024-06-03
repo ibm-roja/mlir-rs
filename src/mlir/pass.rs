@@ -7,11 +7,11 @@ use mlir_sys::MlirPass;
 
 /// A Pass in MLIR is a transformation or analysis that can be applied to a module.
 /// They must be added to a PassManager to be executed.
-pub struct Pass{
-    raw: MlirPass
+pub struct Pass {
+    raw: MlirPass,
 }
 
-impl Pass{
+impl Pass {
     pub fn new(raw: MlirPass) -> Self {
         Self { raw }
     }
