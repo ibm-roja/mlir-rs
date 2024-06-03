@@ -1,6 +1,6 @@
 use std::marker::PhantomData;
 use mlir_sys::{MlirPassManager, mlirPassManagerAddOwnedPass, mlirPassManagerRunOnOp};
-use crate::{Context, OwnedMlirValue};
+use crate::{Context, ContextRef, OwnedMlirValue, UnownedMlirValue};
 use crate::ir::Operation;
 use crate::mlir::logical_result::LogicalResult;
 use crate::pass::Pass;
@@ -14,7 +14,7 @@ pub struct PassManager {
 
 impl PassManager{
     /// Creates a new pass manager.
-    pub fn new(context: &Context) -> Self {
+    pub fn new(context: &ContextRef) -> Self {
         let raw = unsafe { mlir_sys::mlirPassManagerCreate(context.to_raw()) };
         Self {
             raw,
@@ -33,7 +33,7 @@ impl PassManager{
         unsafe { mlirPassManagerAddOwnedPass(self.raw, pass.to_raw()) }
     }
 
-    /// Runs the passes added to the pass manager against a module
+    /// Runs the passes added to the pass manager against any module
     pub fn run(&self, op: &Operation){
         let result = unsafe {
             LogicalResult::from_raw(mlirPassManagerRunOnOp(self.raw, op.to_raw()))
@@ -70,7 +70,8 @@ mod tests {
         let pass_manager = PassManager::new(&context);
         let pass = transforms::create_dce_pass();
         pass_manager.add_pass(Pass::from_raw(pass));
-        let operation = Operation::parse(&context, "", "").unwrap();
+        let operation_source = "module {}";
+        let operation = Operation::parse(&context, operation_source, "").unwrap();
         pass_manager.run(&operation);
         pass_manager.destroy();
     }
