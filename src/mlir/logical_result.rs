@@ -7,7 +7,6 @@ pub struct LogicalResult {
 }
 
 impl LogicalResult {
-
     /// Creates a success result.
     pub const fn success() -> Self {
         Self {
