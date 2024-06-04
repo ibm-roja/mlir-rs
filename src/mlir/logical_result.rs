@@ -31,11 +31,16 @@ impl LogicalResult {
         self.raw.value == 0
     }
 
+    /// Creates a LogicalResult type from a raw MlirLogicalResult.
+    ///
+    /// # Returns
+    /// Returns a LogicalResult.
     pub fn from_raw(raw: MlirLogicalResult) -> Self {
         Self { raw }
     }
 }
 
+#[cfg(test)]
 mod tests {
     use crate::LogicalResult;
 
