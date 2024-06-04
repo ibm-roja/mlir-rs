@@ -1,8 +1,12 @@
-use crate::ir::Operation;
-use crate::mlir::logical_result::LogicalResult;
-use crate::pass::Pass;
-use crate::{Context, ContextRef, OwnedMlirValue, UnownedMlirValue};
+use crate::{
+    Context, ContextRef,
+    ir::Operation,
+    mlir::{Pass, logical_result::LogicalResult},
+    OwnedMlirValue, UnownedMlirValue
+};
+
 use mlir_sys::{mlirPassManagerAddOwnedPass, mlirPassManagerRunOnOp, MlirPassManager};
+
 use std::marker::PhantomData;
 
 /// A PassManager is the top-level entry point for managing a set of optimization passes over a module.
@@ -47,8 +51,8 @@ impl PassManager {
 
 #[cfg(test)]
 mod tests {
+    use crate::mlir::pass::transforms;
     use super::*;
-    use crate::pass::transforms;
 
     #[test]
     fn create_destroy_pass_manager() {

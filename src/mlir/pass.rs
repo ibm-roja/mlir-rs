@@ -12,15 +12,13 @@ pub struct Pass {
 }
 
 impl Pass {
-    pub fn new(raw: MlirPass) -> Self {
-        Self { raw }
-    }
-
-    pub fn to_raw(&self) -> MlirPass {
-        self.raw
-    }
-
+    /// Creates a pass from a raw MLIRPass.
     pub fn from_raw(raw: MlirPass) -> Self {
         Self { raw }
+    }
+
+    /// Converts a pass into a raw MLIRPass.
+    pub fn to_raw(&self) -> MlirPass {
+        self.raw
     }
 }
