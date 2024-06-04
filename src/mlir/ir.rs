@@ -8,6 +8,6 @@ mod r#type;
 mod value;
 
 pub use self::{
-    attribute::*, block::*, identifier::*, location::*, operation::*, r#type::*,
-    region::*, value::*,
+    attribute::*, block::*, identifier::*, location::*, operation::*, r#type::*, region::*,
+    value::*,
 };
