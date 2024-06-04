@@ -1,13 +1,15 @@
+use super::Pass;
+
 use crate::{
     Context, ContextRef,
     ir::Operation,
-    mlir::{Pass, logical_result::LogicalResult},
+    mlir::logical_result::LogicalResult,
     OwnedMlirValue, UnownedMlirValue
 };
 
-use mlir_sys::{mlirPassManagerAddOwnedPass, mlirPassManagerRunOnOp, MlirPassManager};
-
 use std::marker::PhantomData;
+
+use mlir_sys::{mlirPassManagerAddOwnedPass, mlirPassManagerRunOnOp, MlirPassManager};
 
 /// A PassManager is the top-level entry point for managing a set of optimization passes over a module.
 /// It is responsible for scheduling and running the passes.

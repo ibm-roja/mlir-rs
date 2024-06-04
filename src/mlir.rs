@@ -8,6 +8,6 @@ pub mod pass;
 mod string_ref;
 
 pub use self::{
-    context::*, dialect::*, dialect_handle::*, dialect_registry::*, ir::*, logical_result::*,
-    pass::*, string_ref::*,
+    context::*, dialect::*, dialect_handle::*, dialect_registry::*, logical_result::*,
+    string_ref::*,
 };
