@@ -1,10 +1,8 @@
 use super::Pass;
 
 use crate::{
-    Context, ContextRef,
-    ir::Operation,
-    mlir::logical_result::LogicalResult,
-    OwnedMlirValue, UnownedMlirValue
+    ir::Operation, mlir::logical_result::LogicalResult, Context, ContextRef, OwnedMlirValue,
+    UnownedMlirValue,
 };
 
 use std::marker::PhantomData;
@@ -53,8 +51,8 @@ impl PassManager {
 
 #[cfg(test)]
 mod tests {
-    use crate::mlir::pass::transforms;
     use super::*;
+    use crate::mlir::pass::transforms;
 
     #[test]
     fn create_destroy_pass_manager() {
