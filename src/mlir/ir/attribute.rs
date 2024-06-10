@@ -1,11 +1,14 @@
 mod bool;
 mod dense_bool;
 mod dense_i32;
+pub mod dense_string;
 mod float;
 mod integer;
 mod string;
 
-pub use self::{bool::*, dense_bool::*, dense_i32::*, float::*, integer::*, string::*};
+pub use self::{
+    bool::*, dense_bool::*, dense_i32::*, dense_string::*, float::*, integer::*, string::*,
+};
 use crate::{
     ir::{IdentifierRef, TypeRef},
     support::{
