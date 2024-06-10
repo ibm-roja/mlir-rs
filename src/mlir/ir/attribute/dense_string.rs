@@ -10,7 +10,7 @@ use crate::{
     ContextRef,
     ir::{
         attribute::impl_attribute_variant,
-        IdentifierRef, LocationRef, NamedAttribute, OperationBuilder, TypeRef
+        IdentifierRef, NamedAttribute, TypeRef
     }, StringRef,
     support::binding::impl_unowned_mlir_value, UnownedMlirValue
 };
@@ -166,7 +166,7 @@ mod tests {
 
         let attribute_ref = op.attribute("dense string").unwrap();
         let dense_attribute = DenseStringAttributeRef::try_from_attribute(attribute_ref).unwrap();
-        
+
         assert_eq!(dense_attribute.len(), 3);
         assert!(dense_attribute.get(0).eq(&string_refs[0]));
         assert!(dense_attribute.get(1).eq(&string_refs[1]));
