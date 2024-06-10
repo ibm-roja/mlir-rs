@@ -1,7 +1,7 @@
 mod bool;
 mod dense_bool;
 mod dense_i32;
-pub mod dense_string;
+mod dense_string;
 mod float;
 mod integer;
 mod string;

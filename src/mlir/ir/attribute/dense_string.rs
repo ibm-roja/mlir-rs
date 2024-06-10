@@ -1,18 +1,15 @@
-use std::{marker::PhantomData};
+use std::marker::PhantomData;
 
 use mlir_sys::{
-    MlirAttribute, mlirAttributeGetContext, mlirAttributeGetNull, mlirAttributeIsADenseElements,
+    mlirAttributeGetContext, mlirAttributeGetNull, mlirAttributeIsADenseElements,
     mlirDenseElementsAttrGetStringValue, mlirDenseElementsAttrStringGet,
-    mlirElementsAttrGetNumElements, MlirStringRef, mlirRankedTensorTypeGet
+    mlirElementsAttrGetNumElements, mlirRankedTensorTypeGet, MlirAttribute, MlirStringRef,
 };
 
 use crate::{
-    ContextRef,
-    ir::{
-        attribute::impl_attribute_variant,
-        IdentifierRef, NamedAttribute, TypeRef
-    }, StringRef,
-    support::binding::impl_unowned_mlir_value, UnownedMlirValue
+    ir::{attribute::impl_attribute_variant, IdentifierRef, NamedAttribute, TypeRef},
+    support::binding::impl_unowned_mlir_value,
+    ContextRef, StringRef, UnownedMlirValue,
 };
 
 /// [`StringBoolAttributeRef`] is a reference to an instance of the `mlir::DenseStringElementsAttr`, which
@@ -51,20 +48,21 @@ impl DenseStringAttributeRef {
         let shape: [i64; 1] = [values.len() as i64];
 
         let shaped_type = unsafe {
-            mlirRankedTensorTypeGet(1, shape.as_ptr(), {
-                TypeRef::parse(&context, string_type).unwrap().to_raw()
-            }, mlirAttributeGetNull())
+            mlirRankedTensorTypeGet(
+                1,
+                shape.as_ptr(),
+                { TypeRef::parse(&context, string_type).unwrap().to_raw() },
+                mlirAttributeGetNull(),
+            )
         };
 
-        unsafe{
-        Self::from_raw(
-            mlirDenseElementsAttrStringGet(
+        unsafe {
+            Self::from_raw(mlirDenseElementsAttrStringGet(
                 shaped_type,
                 values.len() as isize,
                 values.as_ptr() as *mut MlirStringRef,
             ))
         }
-
     }
 
     /// # Returns
@@ -110,8 +108,11 @@ impl DenseStringAttributeRef {
 
 #[cfg(test)]
 mod tests {
+    use crate::{
+        ir::{DenseStringAttributeRef, LocationRef, OperationBuilder},
+        StringRef,
+    };
     use std::ffi::CString;
-    use crate::{ir::{DenseStringAttributeRef, LocationRef, OperationBuilder}, StringRef};
 
     #[test]
     fn test_compile_return_dense_string_attribute() {
@@ -121,7 +122,7 @@ mod tests {
         let strings = [
             CString::new("hello").unwrap(),
             CString::new("world").unwrap(),
-            CString::new("foo").unwrap()
+            CString::new("foo").unwrap(),
         ];
 
         let string_refs = strings
@@ -129,11 +130,12 @@ mod tests {
             .map(|s| StringRef::from_cstring(s))
             .collect::<Vec<StringRef>>();
 
-        let attr = DenseStringAttributeRef::new(&context, string_refs.as_slice(), "!dialect.string");
+        let attr =
+            DenseStringAttributeRef::new(&context, string_refs.as_slice(), "!dialect.string");
 
         let loc = LocationRef::new_unknown(&context);
         let op = OperationBuilder::new("dialect.op1", loc)
-            .add_attributes( &[attr.with_name("dense string")])
+            .add_attributes(&[attr.with_name("dense string")])
             .build()
             .unwrap();
 
@@ -141,14 +143,14 @@ mod tests {
     }
 
     #[test]
-    fn test_get_dense_string_attributes(){
+    fn test_get_dense_string_attributes() {
         let context = crate::Context::new(None, false);
         context.set_allow_unregistered_dialects(true);
 
         let strings = [
             CString::new("hello").unwrap(),
             CString::new("world").unwrap(),
-            CString::new("foo").unwrap()
+            CString::new("foo").unwrap(),
         ];
 
         let string_refs = strings
@@ -156,11 +158,12 @@ mod tests {
             .map(|s| StringRef::from_cstring(s))
             .collect::<Vec<StringRef>>();
 
-        let attr = DenseStringAttributeRef::new(&context, string_refs.as_slice(), "!dialect.string");
+        let attr =
+            DenseStringAttributeRef::new(&context, string_refs.as_slice(), "!dialect.string");
 
         let loc = LocationRef::new_unknown(&context);
         let op = OperationBuilder::new("dialect.op1", loc)
-            .add_attributes( &[attr.with_name("dense string")])
+            .add_attributes(&[attr.with_name("dense string")])
             .build()
             .unwrap();
 
