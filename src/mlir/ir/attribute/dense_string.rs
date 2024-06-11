@@ -51,7 +51,7 @@ impl DenseStringAttributeRef {
             mlirRankedTensorTypeGet(
                 1,
                 shape.as_ptr(),
-                { TypeRef::parse(&context, string_type).unwrap().to_raw() },
+                TypeRef::parse(&context, string_type).unwrap().to_raw(),
                 mlirAttributeGetNull(),
             )
         };
