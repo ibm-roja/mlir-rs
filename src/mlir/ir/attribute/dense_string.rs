@@ -1,15 +1,15 @@
 use std::marker::PhantomData;
 
 use mlir_sys::{
-    mlirAttributeGetContext, mlirAttributeGetNull, mlirAttributeIsADenseElements,
+    MlirAttribute, mlirAttributeGetNull, mlirAttributeIsADenseElements,
     mlirDenseElementsAttrGetStringValue, mlirDenseElementsAttrStringGet,
-    mlirElementsAttrGetNumElements, mlirRankedTensorTypeGet, MlirAttribute, MlirStringRef,
+    mlirElementsAttrGetNumElements, mlirRankedTensorTypeGet, MlirStringRef,
 };
 
 use crate::{
-    ir::{attribute::impl_attribute_variant, IdentifierRef, NamedAttribute, TypeRef},
+    ir::{attribute::impl_attribute_variant, TypeRef},
     support::binding::impl_unowned_mlir_value,
-    ContextRef, StringRef, UnownedMlirValue,
+    StringRef, UnownedMlirValue,
 };
 
 /// [`StringBoolAttributeRef`] is a reference to an instance of the `mlir::DenseStringElementsAttr`, which
@@ -36,14 +36,13 @@ impl DenseStringAttributeRef {
     /// # Arguments
     /// * `context` - The context that should own the attribute.
     /// * `values` - The strings to hold in the attribute.
-    /// * `string_type` - The string type to be parsed to an MlirType.
+    /// * `string_type` - The type of each string element in the array.
     ///
     /// # Returns
     /// Returns a reference to a new [`DenseStringAttributeRef`] instance.
     pub fn new<'a>(
-        context: &ContextRef,
         values: &[StringRef],
-        string_type: &str,
+        string_type: &'a TypeRef,
     ) -> &'a DenseStringAttributeRef {
         let shape: [i64; 1] = [values.len() as i64];
 
@@ -51,7 +50,7 @@ impl DenseStringAttributeRef {
             mlirRankedTensorTypeGet(
                 1,
                 shape.as_ptr(),
-                TypeRef::parse(&context, string_type).unwrap().to_raw(),
+                string_type.to_raw(),
                 mlirAttributeGetNull(),
             )
         };
@@ -85,38 +84,26 @@ impl DenseStringAttributeRef {
     /// # Returns
     /// Returns the StringRef at the provided index.
     pub fn get(&self, index: isize) -> StringRef {
-        assert!(index < self.len().try_into().unwrap());
+        assert!(index < self.len());
         unsafe {
             let string_ref = mlirDenseElementsAttrGetStringValue(self.to_raw(), index);
             StringRef::from_raw(string_ref)
         }
-    }
-
-    /// # Returns
-    /// Returns a named attribute with the provided name.
-    pub fn with_name(&self, name: &str) -> NamedAttribute {
-        let identifier = IdentifierRef::new(&self.context(), name);
-        unsafe { NamedAttribute::from_raw(identifier.to_raw(), self.to_raw()) }
-    }
-
-    /// # Returns
-    /// Returns a reference to the context that owns the attribute.
-    pub fn context(&self) -> &ContextRef {
-        unsafe { ContextRef::from_raw(mlirAttributeGetContext(self.to_raw())) }
     }
 }
 
 #[cfg(test)]
 mod tests {
     use crate::{
-        ir::{DenseStringAttributeRef, LocationRef, OperationBuilder},
+        Context,
+        ir::{DenseStringAttributeRef, LocationRef, OperationBuilder, TypeRef},
         StringRef,
     };
     use std::ffi::CString;
 
     #[test]
     fn test_compile_return_dense_string_attribute() {
-        let context = crate::Context::new(None, false);
+        let context = Context::new(None, false);
         context.set_allow_unregistered_dialects(true);
 
         let strings = [
@@ -131,7 +118,7 @@ mod tests {
             .collect::<Vec<StringRef>>();
 
         let attr =
-            DenseStringAttributeRef::new(&context, string_refs.as_slice(), "!dialect.string");
+            DenseStringAttributeRef::new(string_refs.as_slice(), TypeRef::parse(&context, "!dialect.string").unwrap());
 
         let loc = LocationRef::new_unknown(&context);
         let op = OperationBuilder::new("dialect.op1", loc)
@@ -144,7 +131,7 @@ mod tests {
 
     #[test]
     fn test_get_dense_string_attributes() {
-        let context = crate::Context::new(None, false);
+        let context = Context::new(None, false);
         context.set_allow_unregistered_dialects(true);
 
         let strings = [
@@ -159,7 +146,7 @@ mod tests {
             .collect::<Vec<StringRef>>();
 
         let attr =
-            DenseStringAttributeRef::new(&context, string_refs.as_slice(), "!dialect.string");
+            DenseStringAttributeRef::new(string_refs.as_slice(), TypeRef::parse(&context, "!dialect.string").unwrap());
 
         let loc = LocationRef::new_unknown(&context);
         let op = OperationBuilder::new("dialect.op1", loc)
