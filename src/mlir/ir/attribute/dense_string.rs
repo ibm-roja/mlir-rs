@@ -12,7 +12,7 @@ use crate::{
     StringRef, UnownedMlirValue,
 };
 
-/// [`StringBoolAttributeRef`] is a reference to an instance of the `mlir::DenseStringElementsAttr`, which
+/// [`DenseStringAttributeRef`] is a reference to an instance of the `mlir::DenseStringElementsAttr`, which
 /// represents a constant array of strings in the MLIR IR.
 ///
 /// The following bindings into the MLIR C API are used/supported:
