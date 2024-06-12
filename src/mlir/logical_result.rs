@@ -61,3 +61,36 @@ impl LogicalResult {
         return !self.succeeded();
     }
 }
+
+#[cfg(test)]
+mod tests {
+    use crate::LogicalResult;
+
+    #[test]
+    fn test_success_true() {
+        let result = LogicalResult::success(true);
+        assert!(result.succeeded());
+        assert!(!result.failed());
+    }
+
+    #[test]
+    fn test_success_false() {
+        let result = LogicalResult::success(false);
+        assert!(!result.succeeded());
+        assert!(result.failed());
+    }
+
+    #[test]
+    fn test_failure_true() {
+        let result = LogicalResult::failure(true);
+        assert!(!result.succeeded());
+        assert!(result.failed());
+    }
+
+    #[test]
+    fn test_failure_false() {
+        let result = LogicalResult::failure(false);
+        assert!(result.succeeded());
+        assert!(!result.failed());
+    }
+}
