@@ -1,6 +1,6 @@
 use mlir_sys::MlirLogicalResult;
 
-/// [`LogicalResult`] wraps the `llvm::LogicalResult` class, an unowned fragment of a string.
+/// [`LogicalResult`] wraps the `llvm::LogicalResult` class.
 #[repr(transparent)]
 #[derive(Debug, Clone, Copy)]
 pub struct LogicalResult {
