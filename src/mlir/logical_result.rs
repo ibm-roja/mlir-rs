@@ -1,6 +1,6 @@
 use mlir_sys::MlirLogicalResult;
 
-/// [`LogicalResult`] represents the `llvm::LogicalResult` class.
+/// [`LogicalResult`] represents the `mlir::LogicalResult` class.
 #[derive(Debug, Clone, Copy)]
 pub enum LogicalResult {
     Success,
