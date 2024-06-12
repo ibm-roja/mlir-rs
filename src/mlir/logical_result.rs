@@ -1,42 +1,64 @@
 use mlir_sys::MlirLogicalResult;
 
-/// A LogicalResult is a wrapper around MlirLogicalResult.
-/// MlirLogicalResult is a type used to represent the result of a logical operation.
+/// [`LogicalResult`] wraps the `llvm::LogicalResult` class, an unowned fragment of a string.
 pub struct LogicalResult {
     raw: MlirLogicalResult,
 }
 
 impl LogicalResult {
-    /// Creates a success result.
+    /// Constructs a [`LogicalResult`] from a provided bool value representing whether the result is a success.
+    ///
+    /// # Arguments
+    /// * `is_success` - The bool value.
+    ///
+    /// # Returns
+    /// Returns a new [`LogicalResult`] instance.
     pub const fn success() -> Self {
         Self {
             raw: MlirLogicalResult { value: 1 },
         }
     }
 
-    /// Creates a failure result.
+    /// Constructs a [`LogicalResult`] from a provided bool value representing whether the result is a failure.
+    ///
+    /// # Arguments
+    /// * `is_failure` - The bool value.
+    ///
+    /// # Returns
+    /// Returns a new [`LogicalResult`] instance.
     pub const fn failure() -> Self {
         Self {
             raw: MlirLogicalResult { value: 0 },
         }
     }
 
-    /// Checks to see if the logical result is a success.
+    /// # Returns
+    /// Returns whether the [`LogicalResult`] value represents a success.
     pub fn succeeded(&self) -> bool {
         self.raw.value != 0
     }
 
-    /// Checks to see if the logical result is a failure.
+    /// # Returns
+    /// Returns whether the [`LogicalResult`] value represents a failure.
     pub fn failed(&self) -> bool {
         self.raw.value == 0
     }
 
-    /// Creates a LogicalResult type from a raw MlirLogicalResult.
+    /// Constructs a [`LogicalResult`] from the provided raw [`MlirLogicalResult`] value.
+    ///
+    /// # Arguments
+    /// * `raw` - The raw [`MlirLogicalResult`] value.
     ///
     /// # Returns
-    /// Returns a LogicalResult.
+    /// Returns a new [`LogicalResult`] instance.
     pub fn from_raw(raw: MlirLogicalResult) -> Self {
         Self { raw }
+    }
+
+    /// # Returns
+    /// Returns the [`MlirLogicalResult`] contained within the [`LogicalResult`].
+    pub fn to_raw(&self) -> MlirLogicalResult {
+        self.raw
     }
 }
 
