@@ -79,13 +79,40 @@ mod tests {
     use crate::Context;
 
     #[test]
-    fn test_dense_bool_attribute() {
+    fn get_elements_len() {
         let context = Context::new(None, false);
         let values = [true, false, true];
         let attr = DenseBoolAttributeRef::new(&context, &values);
         assert_eq!(attr.len(), 3);
+        assert!(!attr.is_empty());
+    }
+
+    #[test]
+    fn get_value() {
+        let context = Context::new(None, false);
+        let values = [true, false, true];
+        let attr = DenseBoolAttributeRef::new(&context, &values);
         assert!(attr.get(0));
         assert!(!attr.get(1));
         assert!(attr.get(2));
+    }
+
+    #[test]
+    fn get_value_out_of_bounds() {
+        let context = Context::new(None, false);
+        let values = [true, false, true];
+        let attr = DenseBoolAttributeRef::new(&context, &values);
+        assert!(std::panic::catch_unwind(|| {
+            attr.get(3);
+        })
+        .is_err());
+    }
+
+    #[test]
+    #[should_panic]
+    fn no_owned_dense_bool_attribute_ref() {
+        let _dense_bool_attribute_ref = DenseBoolAttributeRef {
+            _prevent_external_instantiation: PhantomData,
+        };
     }
 }
