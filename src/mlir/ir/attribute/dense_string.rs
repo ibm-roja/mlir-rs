@@ -1,9 +1,9 @@
-use std::marker::PhantomData;
+use std::{ffi::CString, marker::PhantomData};
 
 use mlir_sys::{
-    MlirAttribute, mlirAttributeGetNull, mlirAttributeIsADenseElements,
-    mlirDenseElementsAttrGetStringValue, mlirDenseElementsAttrStringGet,
-    mlirElementsAttrGetNumElements, mlirRankedTensorTypeGet, MlirStringRef,
+    mlirAttributeGetNull, mlirAttributeIsADenseElements, mlirDenseElementsAttrGetStringValue,
+    mlirDenseElementsAttrStringGet, mlirElementsAttrGetNumElements, mlirRankedTensorTypeGet,
+    MlirAttribute, MlirStringRef,
 };
 
 use crate::{
@@ -12,8 +12,8 @@ use crate::{
     StringRef, UnownedMlirValue,
 };
 
-/// [`DenseStringAttributeRef`] is a reference to an instance of the `mlir::DenseStringElementsAttr`, which
-/// represents a constant array of strings in the MLIR IR.
+/// [`DenseStringAttributeRef`] is a reference to an instance of the `mlir::DenseStringElementsAttr`
+/// class, which represents a constant array of strings in the MLIR IR.
 ///
 /// The following bindings into the MLIR C API are used/supported:
 /// - `mlirAttributeIsADenseElements`
@@ -34,18 +34,16 @@ impl DenseStringAttributeRef {
     /// Constructs a new dense array of strings attribute with the provided values.
     ///
     /// # Arguments
-    /// * `context` - The context that should own the attribute.
     /// * `values` - The strings to hold in the attribute.
     /// * `string_type` - The type of each string element in the array.
     ///
     /// # Returns
     /// Returns a reference to a new [`DenseStringAttributeRef`] instance.
     pub fn new<'a>(
-        values: &[StringRef],
+        values: &[impl AsRef<str>],
         string_type: &'a TypeRef,
     ) -> &'a DenseStringAttributeRef {
         let shape: [i64; 1] = [values.len() as i64];
-
         let shaped_type = unsafe {
             mlirRankedTensorTypeGet(
                 1,
@@ -55,11 +53,20 @@ impl DenseStringAttributeRef {
             )
         };
 
+        let null_terminated_values: Vec<CString> = values
+            .iter()
+            .map(|v| CString::new(v.as_ref()).expect("Failed to convert value to CString"))
+            .collect();
+        let string_refs: Vec<StringRef> = null_terminated_values
+            .iter()
+            .map(StringRef::from_cstring)
+            .collect();
+
         unsafe {
             Self::from_raw(mlirDenseElementsAttrStringGet(
                 shaped_type,
-                values.len() as isize,
-                values.as_ptr() as *mut MlirStringRef,
+                string_refs.len() as isize,
+                string_refs.as_ptr() as *mut MlirStringRef,
             ))
         }
     }
@@ -95,71 +102,67 @@ impl DenseStringAttributeRef {
 #[cfg(test)]
 mod tests {
     use crate::{
+        ir::{DenseStringAttributeRef, Operation, TypeRef},
         Context,
-        ir::{DenseStringAttributeRef, LocationRef, OperationBuilder, TypeRef},
-        StringRef,
     };
-    use std::ffi::CString;
 
     #[test]
-    fn test_compile_return_dense_string_attribute() {
+    fn get_elements_len() {
         let context = Context::new(None, false);
         context.set_allow_unregistered_dialects(true);
-
-        let strings = [
-            CString::new("hello").unwrap(),
-            CString::new("world").unwrap(),
-            CString::new("foo").unwrap(),
-        ];
-
-        let string_refs = strings
-            .iter()
-            .map(|s| StringRef::from_cstring(s))
-            .collect::<Vec<StringRef>>();
-
-        let attr =
-            DenseStringAttributeRef::new(string_refs.as_slice(), TypeRef::parse(&context, "!dialect.string").unwrap());
-
-        let loc = LocationRef::new_unknown(&context);
-        let op = OperationBuilder::new("dialect.op1", loc)
-            .add_attributes(&[attr.with_name("dense string")])
-            .build()
-            .unwrap();
-
-        println!("{}", *op);
+        let values = ["hello", "world", "foo"];
+        let attr = DenseStringAttributeRef::new(
+            &values,
+            TypeRef::parse(&context, "!dialect.string").unwrap(),
+        );
+        assert_eq!(attr.len(), 3);
+        assert!(!attr.is_empty());
     }
 
     #[test]
-    fn test_get_dense_string_attributes() {
+    fn get_values() {
+        let context = Context::new(None, false);
+        context.set_allow_unregistered_dialects(true);
+        let values = ["hello", "world", "foo"];
+        let attr = DenseStringAttributeRef::new(
+            &values,
+            TypeRef::parse(&context, "!dialect.string").unwrap(),
+        );
+        assert_eq!(attr.get(0), "hello");
+        assert_eq!(attr.get(1), "world");
+        assert_eq!(attr.get(2), "foo");
+    }
+
+    #[test]
+    fn empty_array() {
+        let context = Context::new(None, false);
+        context.set_allow_unregistered_dialects(true);
+        let values: [&str; 0] = [];
+        let attr = DenseStringAttributeRef::new(
+            &values,
+            TypeRef::parse(&context, "!dialect.string").unwrap(),
+        );
+        assert_eq!(attr.len(), 0);
+        assert!(attr.is_empty());
+    }
+
+    #[test]
+    fn parse_from_operation() {
         let context = Context::new(None, false);
         context.set_allow_unregistered_dialects(true);
 
-        let strings = [
-            CString::new("hello").unwrap(),
-            CString::new("world").unwrap(),
-            CString::new("foo").unwrap(),
-        ];
+        let op = Operation::parse(
+            &context,
+            r#""dialect.op1"() {dense_string = dense<["hello", "world", "foo"]> : tensor<3x!dialect.string>} : () -> ()"#,
+            "dense_string_test",
+        ).unwrap();
+        let attr_ref =
+            DenseStringAttributeRef::try_from_attribute(op.attribute("dense_string").unwrap())
+                .unwrap();
 
-        let string_refs = strings
-            .iter()
-            .map(|s| StringRef::from_cstring(s))
-            .collect::<Vec<StringRef>>();
-
-        let attr =
-            DenseStringAttributeRef::new(string_refs.as_slice(), TypeRef::parse(&context, "!dialect.string").unwrap());
-
-        let loc = LocationRef::new_unknown(&context);
-        let op = OperationBuilder::new("dialect.op1", loc)
-            .add_attributes(&[attr.with_name("dense string")])
-            .build()
-            .unwrap();
-
-        let attribute_ref = op.attribute("dense string").unwrap();
-        let dense_attribute = DenseStringAttributeRef::try_from_attribute(attribute_ref).unwrap();
-
-        assert_eq!(dense_attribute.len(), 3);
-        assert!(dense_attribute.get(0).eq(&string_refs[0]));
-        assert!(dense_attribute.get(1).eq(&string_refs[1]));
-        assert!(dense_attribute.get(2).eq(&string_refs[2]));
+        assert_eq!(attr_ref.len(), 3);
+        assert_eq!(attr_ref.get(0), "hello");
+        assert_eq!(attr_ref.get(1), "world");
+        assert_eq!(attr_ref.get(2), "foo");
     }
 }
