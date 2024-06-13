@@ -111,7 +111,7 @@ mod tests {
     #[test]
     #[should_panic]
     fn no_owned_dense_bool_attribute_ref() {
-        let _bool_attribute_ref = DenseBoolAttributeRef {
+        let _dense_bool_attribute_ref = DenseBoolAttributeRef {
             _prevent_external_instantiation: PhantomData,
         };
     }

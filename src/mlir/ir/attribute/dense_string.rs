@@ -24,7 +24,6 @@ use crate::{
 #[derive(Debug)]
 pub struct DenseStringAttributeRef {
     _prevent_external_instantiation: PhantomData<()>,
-    raw: MlirAttribute,
 }
 
 impl_unowned_mlir_value!(no_refs, DenseStringAttributeRef, MlirAttribute);
@@ -101,6 +100,7 @@ impl DenseStringAttributeRef {
 
 #[cfg(test)]
 mod tests {
+    use super::*;
     use crate::{
         ir::{DenseStringAttributeRef, Operation, TypeRef},
         Context,
@@ -164,5 +164,13 @@ mod tests {
         assert_eq!(attr_ref.get(0), "hello");
         assert_eq!(attr_ref.get(1), "world");
         assert_eq!(attr_ref.get(2), "foo");
+    }
+
+    #[test]
+    #[should_panic]
+    fn no_owned_dense_string_attribute_ref() {
+        let _dense_string_attribute_ref = DenseStringAttributeRef {
+            _prevent_external_instantiation: PhantomData,
+        };
     }
 }
