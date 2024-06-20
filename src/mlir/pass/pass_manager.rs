@@ -1,9 +1,6 @@
 use super::Pass;
 
-use crate::{
-    ir::Operation, mlir::logical_result::LogicalResult, Context, ContextRef, OwnedMlirValue,
-    UnownedMlirValue,
-};
+use crate::{ir::Operation, Context, ContextRef, OwnedMlirValue, UnownedMlirValue, LogicalResult};
 
 use std::marker::PhantomData;
 
@@ -43,8 +40,12 @@ impl PassManager {
             unsafe { LogicalResult::from_raw(mlirPassManagerRunOnOp(self.raw, op.to_raw())) };
 
         assert!(
-            result.succeeded(),
-            "PassManager failed to run passes on the operation"
+            match result {
+                LogicalResult::Success => true,
+                LogicalResult::Failure => {
+                    panic!("Failed to run pass manager on operation");
+                }
+            }
         );
     }
 }
