@@ -1,49 +1,13 @@
 use mlir_sys::MlirLogicalResult;
 
-/// [`LogicalResult`] wraps the `llvm::LogicalResult` class, an unowned fragment of a string.
-pub struct LogicalResult {
-    raw: MlirLogicalResult,
+/// [`LogicalResult`] represents the `mlir::LogicalResult` class.
+#[derive(Debug, Clone, Copy)]
+pub enum LogicalResult {
+    Success,
+    Failure,
 }
 
 impl LogicalResult {
-    /// Constructs a [`LogicalResult`] from a provided bool value representing whether the result is a success.
-    ///
-    /// # Arguments
-    /// * `is_success` - The bool value.
-    ///
-    /// # Returns
-    /// Returns a new [`LogicalResult`] instance.
-    pub const fn success() -> Self {
-        Self {
-            raw: MlirLogicalResult { value: 1 },
-        }
-    }
-
-    /// Constructs a [`LogicalResult`] from a provided bool value representing whether the result is a failure.
-    ///
-    /// # Arguments
-    /// * `is_failure` - The bool value.
-    ///
-    /// # Returns
-    /// Returns a new [`LogicalResult`] instance.
-    pub const fn failure() -> Self {
-        Self {
-            raw: MlirLogicalResult { value: 0 },
-        }
-    }
-
-    /// # Returns
-    /// Returns whether the [`LogicalResult`] value represents a success.
-    pub fn succeeded(&self) -> bool {
-        self.raw.value != 0
-    }
-
-    /// # Returns
-    /// Returns whether the [`LogicalResult`] value represents a failure.
-    pub fn failed(&self) -> bool {
-        self.raw.value == 0
-    }
-
     /// Constructs a [`LogicalResult`] from the provided raw [`MlirLogicalResult`] value.
     ///
     /// # Arguments
@@ -51,14 +15,21 @@ impl LogicalResult {
     ///
     /// # Returns
     /// Returns a new [`LogicalResult`] instance.
-    pub fn from_raw(raw: MlirLogicalResult) -> Self {
-        Self { raw }
+    pub const fn from_raw(raw: MlirLogicalResult) -> LogicalResult {
+        if raw.value == 0 {
+            Self::Failure
+        } else {
+            Self::Success
+        }
     }
 
     /// # Returns
-    /// Returns the [`MlirLogicalResult`] contained within the [`LogicalResult`].
-    pub fn to_raw(&self) -> MlirLogicalResult {
-        self.raw
+    /// Returns the [`MlirLogicalResult`] represented by the [`LogicalResult`].
+    pub const fn to_raw(&self) -> MlirLogicalResult {
+        match self {
+            Self::Success => MlirLogicalResult { value: 1 },
+            Self::Failure => MlirLogicalResult { value: 0 },
+        }
     }
 }
 
@@ -67,16 +38,10 @@ mod tests {
     use crate::LogicalResult;
 
     #[test]
-    fn success() {
-        let result = LogicalResult::success();
-        assert!(result.succeeded());
-        assert!(!result.failed());
-    }
-
-    #[test]
-    fn failure() {
-        let result = LogicalResult::failure();
-        assert!(!result.succeeded());
-        assert!(result.failed());
+    fn test_to_raw() {
+        let success = LogicalResult::Success;
+        let failure = LogicalResult::Failure;
+        assert_eq!(success.to_raw().value, 1);
+        assert_eq!(failure.to_raw().value, 0);
     }
 }
