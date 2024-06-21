@@ -21,4 +21,10 @@ impl Pass {
     pub fn to_raw(&self) -> MlirPass {
         self.raw
     }
+
+    pub unsafe fn from_raw_fn(create_raw: unsafe extern "C" fn() -> MlirPass) -> Self {
+        Self {
+            raw: unsafe { create_raw() },
+        }
+    }
 }
