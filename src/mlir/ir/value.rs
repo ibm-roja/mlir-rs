@@ -9,10 +9,9 @@ use std::{
     marker::PhantomData,
 };
 
-use mlir_sys::{
-    mlirValueEqual, mlirValueGetType, mlirValueIsABlockArgument, mlirValueIsAOpResult,
-    mlirValuePrint, mlirValueSetType, MlirValue,
-};
+use mlir_sys::{mlirValueEqual, mlirValueGetType, mlirValueIsABlockArgument, mlirValueIsAOpResult, mlirValuePrint, mlirValueSetType, MlirValue, MlirOpOperand, mlirValueGetFirstUse};
+use crate::ir::opoperand::OpOperandRef;
+use crate::OwnedMlirValue;
 
 /// [ValueRef] is a reference to an instance of the `mlir::Value` class, which represents a value in
 /// the MLIR IR (such as the result of an operation or an argument to a block).
@@ -69,6 +68,15 @@ impl<'c> ValueRef<'c> {
     /// Returns whether the value is an operation result.
     pub fn is_op_result(&self) -> bool {
         unsafe { mlirValueIsAOpResult(self.to_raw()) }
+    }
+
+    pub fn get_first_use(&self) -> Option<OpOperandRef<'c>> {
+        let raw = unsafe { OpOperandRef::from_raw(mlirValueGetFirstUse(self.to_raw())) };
+        if raw.is_null() {
+            None
+        } else {
+            Some(raw)
+        }
     }
 }
 

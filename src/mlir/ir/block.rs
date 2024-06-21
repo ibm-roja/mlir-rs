@@ -14,12 +14,7 @@ use std::{
     mem::forget,
 };
 
-use mlir_sys::{
-    mlirBlockAppendOwnedOperation, mlirBlockCreate, mlirBlockDestroy, mlirBlockEqual,
-    mlirBlockGetArgument, mlirBlockGetFirstOperation, mlirBlockGetNextInRegion,
-    mlirBlockGetNumArguments, mlirBlockGetParentOperation, mlirBlockGetParentRegion,
-    mlirBlockGetTerminator, mlirBlockPrint, MlirBlock, MlirLocation, MlirType,
-};
+use mlir_sys::{mlirBlockAppendOwnedOperation, mlirBlockCreate, mlirBlockDestroy, mlirBlockEqual, mlirBlockGetArgument, mlirBlockGetFirstOperation, mlirBlockGetNextInRegion, mlirBlockGetNumArguments, mlirBlockGetParentOperation, mlirBlockGetParentRegion, mlirBlockGetTerminator, mlirBlockPrint, MlirBlock, MlirLocation, MlirType, mlirBlockInsertOwnedOperationAfter, mlirOperationGetBlock};
 
 /// [Block] wraps the `mlir::Block` class, which represents a block of operations in the MLIR IR.
 ///
@@ -48,7 +43,7 @@ use mlir_sys::{
 /// - `mlirBlockInsertOwnedOperationBefore`
 /// - `mlirBlockInsertOwnedOperation`
 #[repr(transparent)]
-#[derive(Debug)]
+#[derive(Debug, Clone)]
 pub struct Block<'c> {
     raw: MlirBlock,
     _context: PhantomData<&'c ()>,
@@ -169,6 +164,12 @@ impl<'c> BlockRef<'c> {
     /// Returns the terminating operation of the region, if it has one.
     pub fn terminator(&self) -> Option<&OperationRef<'c>> {
         unsafe { OperationRef::try_from_raw(mlirBlockGetTerminator(self.to_raw())) }
+    }
+
+    pub fn insert_operation_after(&self, reference: &OperationRef, operation: Operation) {
+        let operation_ref = unsafe { OperationRef::from_raw(operation.to_raw()) };
+        unsafe { mlirBlockInsertOwnedOperationAfter(self.to_raw(), reference.to_raw(), operation_ref.to_raw()) };
+        forget(operation);
     }
 }
 
