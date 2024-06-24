@@ -37,7 +37,7 @@ use mlir_sys::{
 /// This type is ONLY ever safe to use if it is a **reference**! Owned instances will cause
 /// undefined behaviour.
 #[repr(transparent)]
-#[derive(Debug, Hash)]
+#[derive(Debug)]
 pub struct ValueRef<'c> {
     _context: PhantomData<&'c ()>,
 }
@@ -73,6 +73,14 @@ impl<'c> ValueRef<'c> {
         unsafe { mlirValueIsAOpResult(self.to_raw()) }
     }
 
+
+    /// Finds the last use of a ValueRef as an OpOperandRef. This finds the last use because the uses
+    /// are stored in a stack, so the last use is the first one to be popped off the stack.
+    ///
+    /// If the value is not used, this will return None.
+    ///
+    /// # Returns
+    /// Returns the last use of the value as an Option<OpOperandRef>.
     pub fn get_first_use(&self) -> Option<OpOperandRef<'c>> {
         let raw = unsafe { OpOperandRef::from_raw(mlirValueGetFirstUse(self.to_raw())) };
         if raw.is_null() {

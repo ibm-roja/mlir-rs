@@ -18,8 +18,8 @@ use mlir_sys::{
     mlirBlockAppendOwnedOperation, mlirBlockCreate, mlirBlockDestroy, mlirBlockEqual,
     mlirBlockGetArgument, mlirBlockGetFirstOperation, mlirBlockGetNextInRegion,
     mlirBlockGetNumArguments, mlirBlockGetParentOperation, mlirBlockGetParentRegion,
-    mlirBlockGetTerminator, mlirBlockInsertOwnedOperationAfter, mlirBlockPrint,
-    MlirBlock, MlirLocation, MlirType,
+    mlirBlockGetTerminator, mlirBlockInsertOwnedOperationAfter, mlirBlockPrint, MlirBlock,
+    MlirLocation, MlirType,
 };
 
 /// [Block] wraps the `mlir::Block` class, which represents a block of operations in the MLIR IR.
@@ -36,6 +36,7 @@ use mlir_sys::{
 /// - `mlirBlockGetParentOperation`
 /// - `mlirBlockGetParentRegion`
 /// - `mlirBlockGetTerminator`
+/// - `mlirBlockInsertOwnedOperationAfter`
 /// - `mlirBlockPrint`
 ///
 /// The following bindings are not used/supported:
@@ -45,11 +46,10 @@ use mlir_sys::{
 /// - `mlirBlockArgumentSetType`
 /// - `mlirBlockDetach`
 /// - `mlirBlockInsertArgument`
-/// - `mlirBlockInsertOwnedOperationAfter`
 /// - `mlirBlockInsertOwnedOperationBefore`
 /// - `mlirBlockInsertOwnedOperation`
 #[repr(transparent)]
-#[derive(Debug, Clone)]
+#[derive(Debug)]
 pub struct Block<'c> {
     raw: MlirBlock,
     _context: PhantomData<&'c ()>,
@@ -172,6 +172,13 @@ impl<'c> BlockRef<'c> {
         unsafe { OperationRef::try_from_raw(mlirBlockGetTerminator(self.to_raw())) }
     }
 
+    /// Inserts an owned operation immediately after an existing operation in the block.
+    /// If the reference is null, the operation is inserted at the beginning of the block.
+    /// Otherwise, the reference must also belong to the block.
+    ///
+    /// # Arguments
+    /// * `reference` - The operation to insert the new operation after.
+    /// * `operation` - The operation to insert.
     pub fn insert_operation_after(&self, reference: &OperationRef, operation: Operation) {
         let operation_ref = unsafe { OperationRef::from_raw(operation.to_raw()) };
         unsafe {
