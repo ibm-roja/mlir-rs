@@ -74,7 +74,7 @@ impl<'c> ValueRef<'c> {
     }
 
     /// Finds the last use of a ValueRef as an OpOperandRef. This finds the last use because the uses
-    /// are stored in a stack, so the last use is the first one to be popped off the stack.
+    /// are stored in a use-def chain, with uses coming before the definition.
     ///
     /// If the value is not used, this will return None.
     ///

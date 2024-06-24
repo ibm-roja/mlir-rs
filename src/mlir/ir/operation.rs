@@ -516,11 +516,7 @@ impl<'c> OperationRef<'c> {
     }
 }
 
-pub fn walk(
-    op: &OperationRef,
-    callback: MlirOperationWalkCallback,
-    user_data: *mut c_void,
-) {
+pub fn walk(op: &OperationRef, callback: MlirOperationWalkCallback, user_data: *mut c_void) {
     unsafe { mlirOperationWalk(op.to_raw(), callback, user_data, 1) }
 }
 

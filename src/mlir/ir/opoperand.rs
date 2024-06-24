@@ -1,8 +1,8 @@
 use crate::{
     ir::{OperationRef, ValueRef},
-    OwnedMlirValue,
     support::binding::impl_owned_mlir_value,
-    UnownedMlirValue};
+    OwnedMlirValue, UnownedMlirValue,
+};
 
 use std::marker::PhantomData;
 
