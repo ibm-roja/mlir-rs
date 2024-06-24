@@ -9,9 +9,12 @@ use std::{
     marker::PhantomData,
 };
 
-use mlir_sys::{mlirValueEqual, mlirValueGetType, mlirValueIsABlockArgument, mlirValueIsAOpResult, mlirValuePrint, mlirValueSetType, MlirValue, MlirOpOperand, mlirValueGetFirstUse};
 use crate::ir::opoperand::OpOperandRef;
 use crate::OwnedMlirValue;
+use mlir_sys::{
+    mlirValueEqual, mlirValueGetFirstUse, mlirValueGetType, mlirValueIsABlockArgument,
+    mlirValueIsAOpResult, mlirValuePrint, mlirValueSetType, MlirValue,
+};
 
 /// [ValueRef] is a reference to an instance of the `mlir::Value` class, which represents a value in
 /// the MLIR IR (such as the result of an operation or an argument to a block).
@@ -34,7 +37,7 @@ use crate::OwnedMlirValue;
 /// This type is ONLY ever safe to use if it is a **reference**! Owned instances will cause
 /// undefined behaviour.
 #[repr(transparent)]
-#[derive(Debug)]
+#[derive(Debug, Hash)]
 pub struct ValueRef<'c> {
     _context: PhantomData<&'c ()>,
 }

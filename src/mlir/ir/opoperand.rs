@@ -1,8 +1,11 @@
-use std::marker::PhantomData;
-use mlir_sys::{MlirOperation, MlirOpOperand, mlirOpOperandGetNextUse, mlirOpOperandGetOwner, mlirOpOperandGetValue, mlirOpOperandIsNull};
 use crate::ir::{OperationRef, ValueRef};
 use crate::support::binding::impl_owned_mlir_value;
 use crate::{OwnedMlirValue, UnownedMlirValue};
+use mlir_sys::{
+    mlirOpOperandGetNextUse, mlirOpOperandGetOwner, mlirOpOperandGetValue, mlirOpOperandIsNull,
+    MlirOpOperand
+};
+use std::marker::PhantomData;
 
 #[repr(transparent)]
 #[derive(Debug, Clone)]
@@ -15,7 +18,7 @@ impl_owned_mlir_value!(context_ref, OpOperandRef, MlirOpOperand);
 
 impl<'c> OpOperandRef<'c> {
     pub fn is_null(&self) -> bool {
-        unsafe { mlirOpOperandIsNull(self.raw)}
+        unsafe { mlirOpOperandIsNull(self.raw) }
     }
 
     pub fn get_value(&self) -> &ValueRef<'c> {
@@ -23,16 +26,15 @@ impl<'c> OpOperandRef<'c> {
     }
 
     pub fn get_owner(&self) -> &OperationRef {
-        unsafe { OperationRef::from_raw(mlirOpOperandGetOwner(self.to_raw()))}
+        unsafe { OperationRef::from_raw(mlirOpOperandGetOwner(self.to_raw())) }
     }
 
     pub fn next_use(&self) -> Option<OpOperandRef<'c>> {
         let next_raw = unsafe { mlirOpOperandGetNextUse(self.to_raw()) };
-        if unsafe {OpOperandRef::from_raw(next_raw).is_null()} {
+        if unsafe { OpOperandRef::from_raw(next_raw).is_null() } {
             None
         } else {
             Some(unsafe { OpOperandRef::from_raw(next_raw) })
         }
     }
 }
-

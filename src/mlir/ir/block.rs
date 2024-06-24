@@ -14,7 +14,13 @@ use std::{
     mem::forget,
 };
 
-use mlir_sys::{mlirBlockAppendOwnedOperation, mlirBlockCreate, mlirBlockDestroy, mlirBlockEqual, mlirBlockGetArgument, mlirBlockGetFirstOperation, mlirBlockGetNextInRegion, mlirBlockGetNumArguments, mlirBlockGetParentOperation, mlirBlockGetParentRegion, mlirBlockGetTerminator, mlirBlockPrint, MlirBlock, MlirLocation, MlirType, mlirBlockInsertOwnedOperationAfter, mlirOperationGetBlock};
+use mlir_sys::{
+    mlirBlockAppendOwnedOperation, mlirBlockCreate, mlirBlockDestroy, mlirBlockEqual,
+    mlirBlockGetArgument, mlirBlockGetFirstOperation, mlirBlockGetNextInRegion,
+    mlirBlockGetNumArguments, mlirBlockGetParentOperation, mlirBlockGetParentRegion,
+    mlirBlockGetTerminator, mlirBlockInsertOwnedOperationAfter, mlirBlockPrint,
+    MlirBlock, MlirLocation, MlirType,
+};
 
 /// [Block] wraps the `mlir::Block` class, which represents a block of operations in the MLIR IR.
 ///
@@ -168,7 +174,13 @@ impl<'c> BlockRef<'c> {
 
     pub fn insert_operation_after(&self, reference: &OperationRef, operation: Operation) {
         let operation_ref = unsafe { OperationRef::from_raw(operation.to_raw()) };
-        unsafe { mlirBlockInsertOwnedOperationAfter(self.to_raw(), reference.to_raw(), operation_ref.to_raw()) };
+        unsafe {
+            mlirBlockInsertOwnedOperationAfter(
+                self.to_raw(),
+                reference.to_raw(),
+                operation_ref.to_raw(),
+            )
+        };
         forget(operation);
     }
 }

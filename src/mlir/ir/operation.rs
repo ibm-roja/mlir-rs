@@ -12,6 +12,7 @@ use crate::{
     ContextRef, StringRef,
 };
 
+use std::ffi::c_void;
 use std::{
     ffi::CString,
     fmt::{Display, Formatter},
@@ -514,6 +515,10 @@ impl<'c> OperationRef<'c> {
         }
     }
 }
+
+pub type OperationWalkCallback = ::std::option::Option<
+    unsafe extern "C" fn(op: MlirOperation, userData: *mut ::std::os::raw::c_void) -> c_void,
+>;
 
 impl<'c> PartialEq for OperationRef<'c> {
     fn eq(&self, other: &Self) -> bool {
