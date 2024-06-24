@@ -73,7 +73,6 @@ impl<'c> ValueRef<'c> {
         unsafe { mlirValueIsAOpResult(self.to_raw()) }
     }
 
-
     /// Finds the last use of a ValueRef as an OpOperandRef. This finds the last use because the uses
     /// are stored in a stack, so the last use is the first one to be popped off the stack.
     ///

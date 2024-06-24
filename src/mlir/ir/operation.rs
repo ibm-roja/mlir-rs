@@ -19,7 +19,23 @@ use std::{
     marker::PhantomData,
 };
 
-use mlir_sys::{mlirOperationClone, mlirOperationCreateParse, mlirOperationDestroy, mlirOperationEqual, mlirOperationGetAttribute, mlirOperationGetAttributeByName, mlirOperationGetBlock, mlirOperationGetContext, mlirOperationGetDiscardableAttribute, mlirOperationGetDiscardableAttributeByName, mlirOperationGetFirstRegion, mlirOperationGetInherentAttributeByName, mlirOperationGetLocation, mlirOperationGetName, mlirOperationGetNextInBlock, mlirOperationGetNumAttributes, mlirOperationGetNumDiscardableAttributes, mlirOperationGetNumOperands, mlirOperationGetNumRegions, mlirOperationGetNumResults, mlirOperationGetOperand, mlirOperationGetParentOperation, mlirOperationGetRegion, mlirOperationGetResult, mlirOperationHasInherentAttributeByName, mlirOperationMoveAfter, mlirOperationMoveBefore, mlirOperationPrint, mlirOperationRemoveAttributeByName, mlirOperationRemoveDiscardableAttributeByName, mlirOperationRemoveFromParent, mlirOperationSetAttributeByName, mlirOperationSetDiscardableAttributeByName, mlirOperationSetInherentAttributeByName, mlirOperationSetOperand, mlirOperationVerify, MlirOperation, MlirOperationWalkCallback, mlirOperationWalk};
+use mlir_sys::{
+    mlirOperationClone, mlirOperationCreateParse, mlirOperationDestroy, mlirOperationEqual,
+    mlirOperationGetAttribute, mlirOperationGetAttributeByName, mlirOperationGetBlock,
+    mlirOperationGetContext, mlirOperationGetDiscardableAttribute,
+    mlirOperationGetDiscardableAttributeByName, mlirOperationGetFirstRegion,
+    mlirOperationGetInherentAttributeByName, mlirOperationGetLocation, mlirOperationGetName,
+    mlirOperationGetNextInBlock, mlirOperationGetNumAttributes,
+    mlirOperationGetNumDiscardableAttributes, mlirOperationGetNumOperands,
+    mlirOperationGetNumRegions, mlirOperationGetNumResults, mlirOperationGetOperand,
+    mlirOperationGetParentOperation, mlirOperationGetRegion, mlirOperationGetResult,
+    mlirOperationHasInherentAttributeByName, mlirOperationMoveAfter, mlirOperationMoveBefore,
+    mlirOperationPrint, mlirOperationRemoveAttributeByName,
+    mlirOperationRemoveDiscardableAttributeByName, mlirOperationRemoveFromParent,
+    mlirOperationSetAttributeByName, mlirOperationSetDiscardableAttributeByName,
+    mlirOperationSetInherentAttributeByName, mlirOperationSetOperand, mlirOperationVerify,
+    mlirOperationWalk, MlirOperation, MlirOperationWalkCallback,
+};
 
 /// [Operation] wraps the `mlir::Operation` class, which represents a single operation in the MLIR
 /// IR.
@@ -503,15 +519,13 @@ impl<'c> OperationRef<'c> {
 pub fn walk(
     op: &OperationRef,
     callback: MlirOperationWalkCallback,
-    user_data: *mut std::ffi::c_void,
+    user_data: *mut c_void,
 ) {
-    // 1 == postorder
-    unsafe { mlirOperationWalk(op.to_raw(), callback, user_data, 0) }
+    unsafe { mlirOperationWalk(op.to_raw(), callback, user_data, 1) }
 }
 
-pub type OperationWalkCallback = Option<
-    unsafe extern "C" fn(op: MlirOperation, user_data: *mut c_void) -> c_void,
->;
+pub type OperationWalkCallback =
+    Option<unsafe extern "C" fn(op: MlirOperation, user_data: *mut c_void) -> c_void>;
 
 impl<'c> PartialEq for OperationRef<'c> {
     fn eq(&self, other: &Self) -> bool {
