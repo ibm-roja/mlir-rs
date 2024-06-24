@@ -12,6 +12,7 @@ use crate::{
     ContextRef, StringRef,
 };
 
+use std::ffi::c_void;
 use std::{
     ffi::CString,
     fmt::{Display, Formatter},
@@ -33,7 +34,7 @@ use mlir_sys::{
     mlirOperationRemoveDiscardableAttributeByName, mlirOperationRemoveFromParent,
     mlirOperationSetAttributeByName, mlirOperationSetDiscardableAttributeByName,
     mlirOperationSetInherentAttributeByName, mlirOperationSetOperand, mlirOperationVerify,
-    MlirOperation,
+    mlirOperationWalk, MlirOperation, MlirOperationWalkCallback,
 };
 
 /// [Operation] wraps the `mlir::Operation` class, which represents a single operation in the MLIR
@@ -514,6 +515,13 @@ impl<'c> OperationRef<'c> {
         }
     }
 }
+
+pub fn walk(op: &OperationRef, callback: MlirOperationWalkCallback, user_data: *mut c_void) {
+    unsafe { mlirOperationWalk(op.to_raw(), callback, user_data, 1) }
+}
+
+pub type OperationWalkCallback =
+    Option<unsafe extern "C" fn(op: MlirOperation, user_data: *mut c_void) -> c_void>;
 
 impl<'c> PartialEq for OperationRef<'c> {
     fn eq(&self, other: &Self) -> bool {
