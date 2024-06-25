@@ -73,6 +73,6 @@ jobs:
       - name: Testing mlir-rs memory sanitizer
         if: always()
         run: make test-memory
-      - name: Testing mlir-rs memory sanitizer
+      - name: Testing mlir-rs with valgrind
         if: always()
-        run: make test-memory
+        run: make test-valgrind

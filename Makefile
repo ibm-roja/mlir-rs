@@ -108,7 +108,7 @@ export CARGO_TARGET_DIR
 .PHONY: test
 test:
 	@echo "Running test..."
-	@cargo test --target $(HOST_TARGET)
+	@cargo test
 
 .PHONY: test-memory
 test-memory:
@@ -125,7 +125,7 @@ VALGRIND_OPTIONS=--leak-check=full --error-exitcode=1 --track-origins=yes --log-
 
 .PHONY: test-valgrind
 test-valgrind:
-	@echo "Running cargo tests..."
+	@echo "Running valgrind tests..."
 	@output=$$(cargo test 2>&1); \
 	test_binary_path=$$(echo "$$output" | grep 'Running unittests' | awk '{print $$4}'); \
 	test_binary_path=$${test_binary_path//[()]/}; \
