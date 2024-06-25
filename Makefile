@@ -113,27 +113,19 @@ test:
 .PHONY: test-memory
 test-memory:
 	@echo "Running memory sanitizer($(HOST_TARGET))..."
-	@RUSTFLAGS="-Z sanitizer=memory" cargo test --target $(HOST_TARGET)
+	@RUSTFLAGS="-Z sanitizer=memory" cargo test
 
 .PHONY: test-address
 test-address:
 	@echo "Running address sanitizer($(HOST_TARGET))..."
-	@RUSTFLAGS="-Z sanitizer=address" cargo test --target $(HOST_TARGET)
+	@RUSTFLAGS="-Z sanitizer=address" cargo test
 
 
 VALGRIND_OPTIONS=--leak-check=full --error-exitcode=1 --track-origins=yes --log-file=./valgrind.log --show-leak-kinds=all
 
 .PHONY: test-valgrind
 test-valgrind:
-	@echo "Running valgrind tests..."
-	@output=$$(cargo test 2>&1); \
-	test_binary_path=$$(echo "$$output" | grep 'Running unittests' | awk '{print $$4}'); \
-	test_binary_path=$${test_binary_path//[()]/}; \
-	echo "Running valgrind on cargo test binary: $$test_binary_path"; \
-	valgrind $(VALGRIND_OPTIONS) $$test_binary_path
-	@echo "Valgrind test complete."
-	@echo "Checking for memory leaks..."
-	@cat ./valgrind.log
+	./utils/valgrind.sh
 
 .PHONY: test-all
-test-all: test test-memory
+test-all: test test-memory test-address test-valgrind
