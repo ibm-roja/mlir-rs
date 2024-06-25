@@ -60,7 +60,7 @@ jobs:
         run: git config --global --add safe.directory /__w/mlir-rs/mlir-rs
       - uses: actions/checkout@v4
       - name: Setup runner
-        run: sudo bash setup_runner.sh
+        run: sudo setup.sh
       - name: Setup mlir-rs
         run: make setup
       - name: run-checks-mlir-rs
