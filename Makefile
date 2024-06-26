@@ -55,6 +55,14 @@ setup: check_llvm_version
 	@cargo install cargo-llvm-cov cargo-nextest cargo-tarpaulin
 	@rustup component add llvm-tools-preview
 
+.PHONY: setup-llvm
+setup-llvm: 
+	@echo "Installing LLVM..."
+	@sudo ./utils/setup.sh
+
+.PHONY: setup-local 
+setup-local: setup-llvm setup
+
 .PHONY: format
 format:
 	@echo "Running formatter..."
@@ -102,9 +110,6 @@ build-release: format-check lint
 run:
 	@cargo run --release
 
-CARGO_TARGET_DIR := ~/debug-target
-export CARGO_TARGET_DIR
-
 .PHONY: test
 test:
 	@echo "Running test..."
@@ -113,19 +118,17 @@ test:
 .PHONY: test-memory
 test-memory:
 	@echo "Running memory sanitizer($(HOST_TARGET))..."
-	@RUSTFLAGS="-Z sanitizer=memory" cargo test
+	@RUSTFLAGS="-Z sanitizer=memory" cargo test --target $(HOST_TARGET)
 
 .PHONY: test-address
 test-address:
 	@echo "Running address sanitizer($(HOST_TARGET))..."
-	@RUSTFLAGS="-Z sanitizer=address" cargo test
-
-
-VALGRIND_OPTIONS=--leak-check=full --error-exitcode=1 --track-origins=yes --log-file=./valgrind.log --show-leak-kinds=all
+	@RUSTFLAGS="-Z sanitizer=address" cargo test --target $(HOST_TARGET)
 
 .PHONY: test-valgrind
 test-valgrind:
-	./utils/valgrind.sh
+	@echo "Running valgrind memory tester..."
+	@sudo ./utils/valgrind.sh
 
 .PHONY: test-all
 test-all: test test-memory test-address test-valgrind

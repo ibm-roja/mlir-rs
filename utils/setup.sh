@@ -63,16 +63,7 @@ case $ARCH in
 esac
 
 # Install rust
-curl --proto '=https' --tlsv1.2 -sSf https://sh.rustup.rs | sh -s -- -y && \
-    . $HOME/.cargo/env && \
-    rustup default nightly-2024-05-02 && \
-    cargo install cargo-tarpaulin && \
-    cargo install cargo-wasix && \
-    rustup component add clippy && \
-    rustup component add rustfmt && \
-    # Install tools for code coverage
-    cargo install cargo-llvm-cov cargo-nextest && \
-    rustup component add llvm-tools-preview
+curl --proto '=https' --tlsv1.2 -sSf https://sh.rustup.rs | sh -s -- -y && . $HOME/.cargo/env 
 
 PATH=${PATH}:/usr/lib/llvm-${LLVM_VERSION}/bin:/root/.cargo/bin
 export PATH

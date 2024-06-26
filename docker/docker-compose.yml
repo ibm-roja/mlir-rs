@@ -1,0 +1,9 @@
+services:
+  mlir-rs-test:
+    image: mlir-rs-test:latest
+    volumes:
+      - ..:/mlir-rs
+    working_dir: /mlir-rs
+    command: /bin/bash
+    cap_add:
+      - ALL
