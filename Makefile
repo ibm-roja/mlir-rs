@@ -52,7 +52,7 @@ setup: check_llvm_version
 	@rustup default nightly-2024-05-02
 	@rustup component add clippy
 	@rustup component add rustfmt
-	@cargo install cargo-llvm-cov cargo-nextest
+	@cargo install cargo-llvm-cov cargo-nextest cargo-tarpaulin
 	@rustup component add llvm-tools-preview
 
 .PHONY: format

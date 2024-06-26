@@ -22,33 +22,33 @@ jobs:
         uses: fkirc/skip-duplicate-actions@master
         with:
           cancel_others: true
-  # code-coverage-mlir-rs:
-  #   runs-on: ubuntu-latest
-  #   steps:
-  #     - name: Check for duplicate actions
-  #       uses: fkirc/skip-duplicate-actions@master
-  #       with:
-  #         cancel_others: true
-  #     - name: set git config
-  #       run: git config --global --add safe.directory /__w/mlir-rs/mlir-rs
-  #     - uses: actions/checkout@v4
-  #     - name: Setup runner
-  #       run: sudo bash setup_runner.sh
-  #     - name: Setup mlir-rs
-  #       run: make setup
-  #     - name: code-coverage-mlir-rs
-  #       run: make code-coverage
-  #     - name: Produce the coverage report
-  #       uses: insightsengineering/coverage-action@v2
-  #       with:
-  #         path: ./cobertura.xml
-  #         threshold: 80
-  #         fail: false
-  #         publish: true
-  #         coverage-summary-title: "mlir-rs: Code Coverage Summary"
-  #     - name: print-result
-  #       shell: bash
-  #       run: echo "Code Coverage Passed"
+  code-coverage-mlir-rs:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Check for duplicate actions
+        uses: fkirc/skip-duplicate-actions@master
+        with:
+          cancel_others: true
+      - name: set git config
+        run: git config --global --add safe.directory /__w/mlir-rs/mlir-rs
+      - uses: actions/checkout@v4
+      - name: Setup runner
+        run: sudo bash setup_runner.sh
+      - name: Setup mlir-rs
+        run: make setup
+      - name: code-coverage-mlir-rs
+        run: make code-coverage
+      - name: Produce the coverage report
+        uses: insightsengineering/coverage-action@v2
+        with:
+          path: ./cobertura.xml
+          threshold: 80
+          fail: false
+          publish: true
+          coverage-summary-title: "mlir-rs: Code Coverage Summary"
+      - name: print-result
+        shell: bash
+        run: echo "Code Coverage Passed"
   test-mlir-rs:
     runs-on: ubuntu-latest
     steps:
