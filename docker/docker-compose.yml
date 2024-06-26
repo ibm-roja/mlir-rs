@@ -4,6 +4,6 @@ services:
     volumes:
       - ..:/mlir-rs
     working_dir: /mlir-rs
-    command: /bin/bash
+    command: bash /mlir-rs/utils/test-all.sh
     cap_add:
       - ALL

@@ -63,16 +63,16 @@ jobs:
         run: sudo ./utils/setup.sh
       - name: Setup mlir-rs
         run: make setup
-      - name: run-checks-mlir-rs
+      - name: Lint and format check
         run: make github-checks
       - name: Testing mlir-rs no sanitizer
         run: make test
-      - name: Testing mlir-rs address sanitizer 
+      - name: Testing mlir-rs w/ rust address sanitizer 
         if: success() || failure()
         run: make test-address
-      - name: Testing mlir-rs memory sanitizer
+      - name: Testing mlir-rs w/ rust memory sanitizer
         if: success() || failure()
         run: make test-memory
-      - name: Testing mlir-rs with valgrind
+      - name: Testing mlir-rs w/ valgrind
         if: success() || failure()
         run: make test-valgrind

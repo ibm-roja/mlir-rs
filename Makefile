@@ -128,7 +128,7 @@ test-address:
 .PHONY: test-valgrind
 test-valgrind:
 	@echo "Running valgrind memory tester..."
-	@sudo ./utils/valgrind.sh
+	@./utils/valgrind.sh
 
 .PHONY: test-all
 test-all: test test-memory test-address test-valgrind

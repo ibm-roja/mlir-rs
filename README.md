@@ -15,7 +15,11 @@ make test-valgrind
 ### MacOS - Container
 Memory testing on M series macbooks is more involved, but still possible. Our solution is to use a docker container running ubuntu arm, and building said docker image before running any tests. We mount the mlir-rs repo into the container, allowing the container to access the make steps we want to run. 
 
-NOTE: Building the docker image will run the same setup as make setup-local, so no need to run that again.
+> [!TIP]  
+> Building the docker image will run the same setup as make setup-local, so no need to run that again.
+
+> [!WARNING]  
+> Sometimes the first 1 - 2 runs can result in errors, however subsequent runs will have no issues. This is intermittent, so you may not run into this.
 
 ```bash
 cd docker && docker build -t mlir-rs-test:latest .
