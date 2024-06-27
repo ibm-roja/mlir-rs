@@ -29,8 +29,10 @@ jobs:
       - name: set git config
         run: git config --global --add safe.directory /__w/mlir-rs/mlir-rs
       - uses: actions/checkout@v4
+      - name: Update package list
+        run: sudo apt-get update
       - name: Install valgrind
-        run: apt-get install -y valgrind
+        run: apt-get install -y valgrind --fix-missing
       - name: Setup runner
         run: make setup
       - name: Testing mlir-rs w/ valgrind
