@@ -128,7 +128,7 @@ test-address:
 .PHONY: test-valgrind
 test-valgrind:
 	@echo "Running valgrind memory tester..."
-	@./utils/valgrind.sh
+	@bash ./utils/valgrind.sh 
 
 .PHONY: test-all
 test-all: test test-memory test-address test-valgrind

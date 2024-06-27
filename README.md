@@ -19,17 +19,11 @@ Memory testing on M series macbooks is more involved, but still possible. Our so
 > Building the docker image will run the same setup as make setup-local, so no need to run that again.
 
 > [!WARNING]  
-> Sometimes the first 1 - 2 runs can result in errors, however subsequent runs will have no issues. This is intermittent, so you may not run into this.
+> Sometimes the first 1 - 2 runs can result in linker errors, however subsequent runs will have no issues. This is intermittent, so you may not run into this.
 
 ```bash
+# If image is not yet built. build it.
 cd docker && docker build -t mlir-rs-test:latest .
-docker compose run mlir-rs-test
-# After running docker compose run you'll be placed in the container
-make test
-make test-address
-make test-memory
-make test-valgrind
+# Otherwise run docker compose up from the docker directory.
+docker compose up
 ```
-
-### MacOS - On Host
-![If only you knew how bad things really are](https://static1.cbrimages.com/wordpress/wp-content/uploads/2023/01/this-is-fine.jpg)
