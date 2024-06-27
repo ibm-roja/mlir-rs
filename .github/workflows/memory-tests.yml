@@ -33,6 +33,8 @@ jobs:
         run: apt-get update
       - name: Install valgrind
         run: apt-get install -y valgrind --fix-missing
+      - name: Install valgrind
+        run: which valgrind
       - name: Setup runner
         run: make setup
       - name: Testing mlir-rs w/ valgrind
