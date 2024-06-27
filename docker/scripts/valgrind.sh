@@ -1,8 +1,8 @@
 #!/usr/bin/env bash
 
 output=$(cargo test 2>&1)
-echo "output: $output" &&
-raw_test_binary_path=$(echo "$output" | grep 'Running unittests src/lib.rs' )
+echo "output: $output"
+test_binary_path=$(echo "$output" | grep -o '^\s*Running unittests')
 echo "raw_test_binary_path: $raw_test_binary_path"
 test_binary_path=$(echo "$raw_test_binary_path" | awk '{print $4}')
 echo "test_binary_path: $test_binary_path"
