@@ -30,7 +30,7 @@ jobs:
         run: git config --global --add safe.directory /__w/mlir-rs/mlir-rs
       - uses: actions/checkout@v4
       - name: Install valgrind
-        run: apt install -y valgrind
+        run: apt-get install -y valgrind
       - name: Setup runner
         run: make setup
       - name: Testing mlir-rs w/ valgrind

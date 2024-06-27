@@ -4,10 +4,10 @@ services:
     build: .
     volumes:
       - ..:/mlir-rs
-    command: bash /mlir-rs/docker/scripts/test-all.sh
+    command: /bin/sh -c "cd /mlir-rs && make setup && ./docker/scripts/test-all.sh"
     cap_add:
       - ALL
     security_opt:
       - seccomp:unconfined
     environment:
-      - CARGO_TARGET_DIR=~/target
+      - CARGO_TARGET_DIR=/target
