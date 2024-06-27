@@ -1,9 +1,10 @@
 services:
   mlir-rs-test:
     image: mlir-rs-test:latest
+    build: .
     volumes:
       - ..:/mlir-rs
     working_dir: /mlir-rs
-    command: bash /mlir-rs/utils/test-all.sh
+    command: bash /mlir-rs/docker/scripts/test-all.sh
     cap_add:
       - ALL

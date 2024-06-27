@@ -7,7 +7,7 @@ RUN apt-get update && \
     wget build-essential curl zlib1g-dev libzstd-dev pkg-config \
     libssl-dev cmake zlib1g-dev libcurl4-openssl-dev libelf-dev \
     libdw-dev binutils-dev libiberty-dev lsb-release wget software-properties-common gnupg xz-utils \
-    libncurses-dev libxml2-dev ninja-build clang lld git
+    libncurses-dev libxml2-dev ninja-build clang lld git valgrind
 
 RUN wget -O - https://apt.kitware.com/keys/kitware-archive-latest.asc 2>/dev/null \
     | gpg --dearmor - | tee /etc/apt/trusted.gpg.d/kitware.gpg >/dev/null && \
@@ -16,8 +16,8 @@ RUN wget -O - https://apt.kitware.com/keys/kitware-archive-latest.asc 2>/dev/nul
     apt update && \
     apt install -y cmake
 
-COPY scripts/llvm-install.sh /llvm-install.sh
-RUN chmod +x /llvm-install.sh && /llvm-install.sh
+COPY scripts/* /scripts/
+RUN chmod +x /scripts/* && /scripts/llvm-install.sh
 
 # Install Rust
 RUN curl --proto '=https' --tlsv1.2 -sSf https://sh.rustup.rs | sh -s -- -y && \
@@ -29,8 +29,6 @@ RUN curl --proto '=https' --tlsv1.2 -sSf https://sh.rustup.rs | sh -s -- -y && \
     # Install tools for code coverage
     cargo install cargo-llvm-cov cargo-nextest && \
     rustup component add llvm-tools-preview
-
-RUN apt-get install -y valgrind
 
 ENV PATH=${PATH}:/usr/lib/llvm-${LLVM_VERSION}/bin:/root/.cargo/bin
 # Github actions override the default home directory, this is a workaround to find the cargo and rustup directories
