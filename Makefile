@@ -110,7 +110,7 @@ test:
 .PHONY: test-memory
 test-memory:
 	@echo "Running memory sanitizer($(HOST_TARGET))..."
-	@RUSTFLAGS="-Z sanitizer=memory" cargo test --target $(HOST_TARGET)
+	@RUSTFLAGS="-Z sanitizer=memory" cargo test --target $(HOST_TARGET) -- --nocapture
 
 .PHONY: test-address
 test-address:
