@@ -1,6 +1,7 @@
 #!/usr/bin/env bash
 
 output=$(cargo test 2>&1)
+echo "$output"
 test_binary_path=$(echo "$output" | grep 'Running unittests' | awk '{print $4}')
 test_binary_path="${test_binary_path//[()]/}"
 echo "Running valgrind on cargo test binary: $test_binary_path"
