@@ -2,7 +2,9 @@
 
 output=$(cargo test 2>&1) &&
 echo "output: $output" &&
-test_binary_path=$(echo "$output" | grep 'Running unittests' | awk '{print $4}') &&
+raw_test_binary_path=$(echo "$output" | grep '*Running unittests*' ) &&
+echo "raw_test_binary_path: $raw_test_binary_path" &&
+test_binary_path=$(echo "$raw_test_binary_path" | awk '{print $4}') &&
 echo "test_binary_path: $test_binary_path" &&
 test_binary_path="${test_binary_path//[()]/}" &&
 echo "test_binary_path: $test_binary_path" &&
