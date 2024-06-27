@@ -33,8 +33,6 @@ jobs:
       - name: set git config
         run: git config --global --add safe.directory /__w/mlir-rs/mlir-rs
       - uses: actions/checkout@v4
-      - name: Setup runner
-        run: sudo ./utils/setup.sh
       - name: Setup mlir-rs
         run: make setup
       - name: code-coverage-mlir-rs
@@ -50,7 +48,7 @@ jobs:
       - name: print-result
         shell: bash
         run: echo "Code Coverage Passed"
-        
+
   lint-mlir-rs:
     runs-on: ubuntu-latest
     container:

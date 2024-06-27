@@ -9,6 +9,8 @@ RUN apt-get update && \
     libdw-dev binutils-dev libiberty-dev lsb-release wget software-properties-common gnupg xz-utils \
     libncurses-dev libxml2-dev ninja-build clang lld git valgrind
 
+RUN which valgrind || (echo "valgrind not found" && exit 1)
+
 RUN wget -O - https://apt.kitware.com/keys/kitware-archive-latest.asc 2>/dev/null \
     | gpg --dearmor - | tee /etc/apt/trusted.gpg.d/kitware.gpg >/dev/null && \
     apt-add-repository "deb https://apt.kitware.com/ubuntu/ $(lsb_release -cs) main" && \

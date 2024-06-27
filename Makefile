@@ -86,7 +86,7 @@ code-coverage-html:
 .PHONY: build
 build:
 	@echo "Building mlir-sys (unoptimized)..."
-	@cargo build --all --all-features
+	@cargo build --all --all-features --target $(HOST_TARGET)
 
 .PHONY: clean
 clean:
@@ -105,7 +105,7 @@ run:
 .PHONY: test
 test:
 	@echo "Running test..."
-	@cargo test
+	@cargo test --target $(HOST_TARGET)
 
 .PHONY: test-memory
 test-memory:

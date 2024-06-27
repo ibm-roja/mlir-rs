@@ -1,4 +1,4 @@
-name: pre-check
+name: Memory Tests
 
 # on:
 #  workflow_dispatch:
