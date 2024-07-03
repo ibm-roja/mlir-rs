@@ -20,5 +20,5 @@ The exact steps being run can be found in the `docker/scripts/test-all.sh` scrip
 Resulting logs will be stored in the host repo directory under `.output`.
 
 ```bash
-docker compose run mlir-rs-test
+cd docker && docker compose run mlir-rs-test
 ```
