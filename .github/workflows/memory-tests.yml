@@ -1,0 +1,83 @@
+name: Memory Tests
+
+on:
+ workflow_dispatch:
+
+env:
+  CARGO_TERM_COLOR: always
+jobs:
+  # Temporarily disabling until issue is fixed.
+  # valgrind-check-container:
+  #   runs-on: ubuntu-latest
+  #   container:
+  #     image: icr.io/action/rust
+  #     options: --security-opt seccomp=unconfined
+  #     env:
+  #       HOME: /root
+  #     credentials:
+  #       username: iamapikey
+  #       password: ${{ secrets.IBM_CLOUD_REGISTRY_KEY }}
+  #   steps:
+  #     - name: Check for duplicate actions
+  #       uses: fkirc/skip-duplicate-actions@master
+  #       with:
+  #         cancel_others: true
+  #     - name: set git config
+  #       run: git config --global --add safe.directory /__w/mlir-rs/mlir-rs
+  #     - uses: actions/checkout@v4
+  #     - name: Update package list
+  #       run: apt-get update
+  #     - name: Install valgrind
+  #       run: apt-get install -y valgrind --fix-missing
+  #     - name: Install valgrind
+  #       run: which valgrind
+  #     - name: Setup runner
+  #       run: make setup
+  #     - name: Testing mlir-rs w/ valgrind
+  #       run: make test-valgrind
+      
+  address-sanitizer-check:
+    runs-on: ubuntu-latest
+    container:
+      image: icr.io/action/rust
+      options: --security-opt seccomp=unconfined
+      env:
+        HOME: /root
+      credentials:
+        username: iamapikey
+        password: ${{ secrets.IBM_CLOUD_REGISTRY_KEY }}
+    steps:
+      - name: Check for duplicate actions
+        uses: fkirc/skip-duplicate-actions@master
+        with:
+          cancel_others: true
+      - name: set git config
+        run: git config --global --add safe.directory /__w/mlir-rs/mlir-rs
+      - uses: actions/checkout@v4
+      - name: Setup runner
+        run: make setup
+      - name: Testing mlir-rs w/ rust address sanitizer 
+        run: make test-address
+      
+  memory-sanitizer-check:
+    runs-on: ubuntu-latest
+    container:
+      image: icr.io/action/rust
+      options: --security-opt seccomp=unconfined
+      env:
+        HOME: /root
+      credentials:
+        username: iamapikey
+        password: ${{ secrets.IBM_CLOUD_REGISTRY_KEY }}
+    steps:
+      - name: Check for duplicate actions
+        uses: fkirc/skip-duplicate-actions@master
+        with:
+          cancel_others: true
+      - name: set git config
+        run: git config --global --add safe.directory /__w/mlir-rs/mlir-rs
+      - uses: actions/checkout@v4
+      - name: Setup runner
+        run: make setup
+      - name: Testing mlir-rs w/ rust memory sanitizer
+        run: make test-memory
