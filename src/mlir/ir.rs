@@ -3,6 +3,7 @@ mod block;
 mod identifier;
 mod location;
 mod operation;
+mod opoperand;
 mod region;
 mod r#type;
 mod value;

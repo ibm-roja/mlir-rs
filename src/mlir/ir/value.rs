@@ -9,9 +9,11 @@ use std::{
     marker::PhantomData,
 };
 
+use crate::ir::opoperand::OpOperandRef;
+use crate::OwnedMlirValue;
 use mlir_sys::{
-    mlirValueEqual, mlirValueGetType, mlirValueIsABlockArgument, mlirValueIsAOpResult,
-    mlirValuePrint, mlirValueSetType, MlirValue,
+    mlirValueEqual, mlirValueGetFirstUse, mlirValueGetType, mlirValueIsABlockArgument,
+    mlirValueIsAOpResult, mlirValuePrint, mlirValueSetType, MlirValue,
 };
 
 /// [ValueRef] is a reference to an instance of the `mlir::Value` class, which represents a value in
@@ -69,6 +71,22 @@ impl<'c> ValueRef<'c> {
     /// Returns whether the value is an operation result.
     pub fn is_op_result(&self) -> bool {
         unsafe { mlirValueIsAOpResult(self.to_raw()) }
+    }
+
+    /// Finds the last use of a ValueRef as an OpOperandRef. This finds the last use because the uses
+    /// are stored in a use-def chain, with uses coming before the definition.
+    ///
+    /// If the value is not used, this will return None.
+    ///
+    /// # Returns
+    /// Returns the last use of the value as an Option<OpOperandRef>.
+    pub fn get_first_use(&self) -> Option<OpOperandRef<'c>> {
+        let raw = unsafe { OpOperandRef::from_raw(mlirValueGetFirstUse(self.to_raw())) };
+        if raw.is_null() {
+            None
+        } else {
+            Some(raw)
+        }
     }
 }
 
